@@ -1,0 +1,27 @@
+import { BlockstackNamespace } from './skeletons';
+export declare const transactions: {
+    makeRenewal: (fullyQualifiedName: string, destinationAddress: string, ownerKeyHex: string, paymentKeyHex: string, zonefile?: string, valueHash?: string) => Promise<any>;
+    makeUpdate: (fullyQualifiedName: string, ownerKeyHex: string, paymentKeyHex: string, zonefile: string, valueHash?: string) => Promise<any>;
+    makePreorder: (fullyQualifiedName: string, destinationAddress: string, paymentKeyHex: string) => Promise<any>;
+    makeRegister: (fullyQualifiedName: string, registerAddress: string, paymentKeyHex: string, zonefile?: string, valueHash?: string) => Promise<any>;
+    makeTransfer: (fullyQualifiedName: string, destinationAddress: string, ownerKeyHex: string, paymentKeyHex: string, keepZonefile?: boolean) => Promise<any>;
+    makeRevoke: (fullyQualifiedName: string, ownerKeyHex: string, paymentKeyHex: string) => Promise<any>;
+    makeNamespacePreorder: (namespaceID: string, revealAddress: string, paymentKeyHex: string) => Promise<any>;
+    makeNamespaceReveal: (namespace: BlockstackNamespace, revealAddress: string, paymentKeyHex: string) => Promise<any>;
+    makeNamespaceReady: (namespaceID: string, revealKeyHex: string) => Promise<any>;
+    makeBitcoinSpend: (destinationAddress: string, paymentKeyHex: string, amount: number) => Promise<any>;
+    makeNameImport: (name: string, recipientAddr: string, zonefileHash: string, importerKeyHex: string) => Promise<any>;
+    makeAnnounce: (messageHash: string, senderKeyHex: string) => Promise<any>;
+    BlockstackNamespace: typeof BlockstackNamespace;
+    estimatePreorder: (fullyQualifiedName: string, destinationAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateRegister: (fullyQualifiedName: string, registerAddress: string, paymentAddress: string, includingZonefile?: boolean, paymentUtxos?: number) => Promise<number>;
+    estimateTransfer: (fullyQualifiedName: string, destinationAddress: string, ownerAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateUpdate: (fullyQualifiedName: string, ownerAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateRenewal: (fullyQualifiedName: string, destinationAddress: string, ownerAddress: string, paymentAddress: string, includingZonefile?: boolean, paymentUtxos?: number) => Promise<number>;
+    estimateRevoke: (fullyQualifiedName: string, ownerAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateNamespacePreorder: (namespaceID: string, revealAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateNamespaceReveal: (namespace: BlockstackNamespace, revealAddress: string, paymentAddress: string, paymentUtxos?: number) => Promise<number>;
+    estimateNamespaceReady: (namespaceID: string, revealUtxos?: number) => Promise<number>;
+    estimateNameImport: (name: string, recipientAddr: string, zonefileHash: string, importUtxos?: number) => Promise<number>;
+    estimateAnnounce: (messageHash: string, senderUtxos?: number) => Promise<number>;
+};

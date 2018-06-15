@@ -1,0 +1,35 @@
+html {
+  font-size: 14px;
+  overflow-y: auto;
+}
+
+body {
+  background-color: #fff;
+  // line-height: 1.5;
+}
+
+a.hover-underline:hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  right: 0;
+  margin: auto;
+  height: 2px;
+  background-color: currentColor;
+}
+
+a.hover-underline-child:hover {
+  > span,h1,h2,h3,h4,a {
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -1px;
+      right: 0;
+      margin: auto;
+      height: 2px;
+      background-color: currentColor;
+    }
+  }
+}
