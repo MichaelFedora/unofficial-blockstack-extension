@@ -1,4 +1,4 @@
-import { HDNode } from 'bitcoinjs-lib';
+
 import { transactions as bsTransactions, config, safety, GaiaHubConfig, makeProfileZoneFile, getTokenFileUrl } from 'blockstack';
 import { BlockstackNetwork } from 'blockstack/network';
 import { ActionContext, Module } from 'vuex';

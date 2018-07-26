@@ -1,7 +1,5 @@
 import { StoreOptions } from 'vuex';
 import { makeDefaultApiClone, ApiSettingsType } from '../settings/default';
-import { HDNode } from 'bitcoinjs-lib';
-import { WrappedKeychain } from '../data/wrapped-keychain';
 import { accountModule } from './stores/account.store';
 import { appsModule } from './stores/apps.store';
 import { registrationModule } from './stores/registration.store';

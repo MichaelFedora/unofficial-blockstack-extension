@@ -35,8 +35,8 @@
   </div>
   </template>
   <button class='button is-primary' @click='deriveNewIdentity()'>Add Identity</button>
-  <button class='button is-info' disabled>Dashboard</button>
-  <button class='button is-info' disabled>Settings</button>
+  <button class='button is-info' @click='gotoMain()'>Dashboard</button>
+  <button class='button is-info' @click='gotoMain("settings")'>Settings</button>
   <button class='button is-danger' @click='logout()'>Logout</button>
 </div>
 </template>

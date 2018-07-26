@@ -1,4 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
+// @ts-ignore
+import { payments } from 'bitcoinjs-lib';
+import bip32 from 'bip32';
 import { createCipher, createDecipher } from 'crypto';
 
 export const BLOCKSTACK_INC = 'gaia-hub'
@@ -13,6 +16,10 @@ export function isABlockstackIDName(s) {
 
 export function isABlockstackAppName(s) {
   return /^[a-z0-9-]+\.app$/.test(s)
+}
+
+export function getAddress(node: bip32, network?: any) {
+  return payments.p2pkh({ pubkey: node.publicKey }).address;
 }
 
 async function isNameAvailable(lookupUrl: string, domainName: string) {

@@ -1,7 +1,8 @@
-import { HDNode } from 'bitcoinjs-lib';
+import bip32 from 'bip32';
 import { createHash } from 'crypto';
 
 import { IdentityAddressOwnerNode } from './identity-address-owner-node';
+import { WrappedNode } from './wrapped-node';
 
 const IDENTITY_KEYCHAIN = 888;
 const BLOCKSTACK_ON_BITCOIN = 0;
@@ -11,18 +12,16 @@ const BITCOIN_COIN_TYPE = 0;
 const ACCOUNT_INDEX = 0;
 
 export class WrappedKeychain {
-  private node: HDNode;
+  private node: WrappedNode;
 
-  private _identityPrivateKeychain: HDNode;
-  private _identityPublicKeychain: HDNode;
+  private _identityPrivateKeychain: WrappedNode;
+  private _identityPublicKeychain: WrappedNode;
 
-  private _bitcoinPrivateKeychain: HDNode;
-  private _bitcoinPublicKeychain: HDNode;
+  private _bitcoinPrivateKeychain: WrappedNode;
+  private _bitcoinPublicKeychain: WrappedNode;
 
-  private derivedIdentityKeyPair;
-
-  constructor(hdNode: HDNode) {
-    this.node = hdNode;
+  constructor(node: bip32 | WrappedNode) {
+    this.node = (node instanceof WrappedNode) ? node : new WrappedNode(node);
     this._identityPrivateKeychain = this.node.deriveHardened(IDENTITY_KEYCHAIN).deriveHardened(BLOCKSTACK_ON_BITCOIN);
     this._identityPublicKeychain = this._identityPrivateKeychain.neutered();
     this._bitcoinPrivateKeychain = this.node.deriveHardened(BIP_44_PURPOSE).deriveHardened(BITCOIN_COIN_TYPE).deriveHardened(ACCOUNT_INDEX);
@@ -41,7 +40,8 @@ export class WrappedKeychain {
 
   getIdentityOwnerAddressNode(identityIndex?: number) {
     identityIndex = identityIndex || 0;
-    const publicKey = this.identityPrivateKeychain.keyPair.getPublicKeyBuffer().toString('hex');
+    // @ts-ignore
+    const publicKey = this.identityPrivateKeychain.keyPair.publicKey.toString('hex');
     const salt = createHash('sha256').update(publicKey).digest('hex');
     return new IdentityAddressOwnerNode(this.identityPrivateKeychain.deriveHardened(identityIndex), salt);
   }

@@ -52,8 +52,8 @@ export const appsModule: Module<AppsStateType, StateType> = {
       commit('reset', options);
     },
     async updateAppList({ commit, rootState }) {
-      const res = await axios.get(rootState.settings.api.browserServerUrl + '/data');
-      commit('updateAppList', { apps: res.data.apps, version: res.data.version })
+      // const res = await axios.get(rootState.settings.api.browserServerUrl + '/data');
+      // commit('updateAppList', { apps: res.data.apps, version: res.data.version })
     }
   }
 }

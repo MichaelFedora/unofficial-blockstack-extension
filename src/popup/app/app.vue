@@ -5,7 +5,7 @@
   </div>
 
   <div id='sidebar' v-if='sidebar'>
-    <bs-popup-sidebar :toggle.sync='sidebar'></bs-popup-sidebar>
+    <bs-popup-sidebar :toggle.sync='sidebar' @gotoMain='gotoMain($event)'></bs-popup-sidebar>
   </div>
 
   <template v-else>

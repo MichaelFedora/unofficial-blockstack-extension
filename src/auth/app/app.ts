@@ -9,7 +9,8 @@ import {
   isLaterVersion,
   updateQueryStringParameter
 } from 'blockstack';
-import { HDNode } from 'bitcoinjs-lib';
+
+import bip32 from 'bip32';
 
 import { VALID_AUTH_SCOPES, validateAuthScopes, AuthTokenHeader, AuthTokenPayload } from '../../common/token-util';
 import { decodeToken } from 'jsontokens'
@@ -175,8 +176,8 @@ export default (Vue as VueConstructor<VVue>).extend({
       }
 
       const privateKey = identityKeypair.key;
-      const appPrivateKey = AppNode.fromAppsHdNode(
-        HDNode.fromBase58(identityKeypair.appsNodeKey),
+      const appPrivateKey = AppNode.fromAppsNode(
+        bip32.fromBase58(identityKeypair.appsNodeKey),
          identityKeypair.salt,
          appDomain).appPrivateKey;
 

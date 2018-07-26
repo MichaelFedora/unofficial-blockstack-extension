@@ -6,7 +6,6 @@
   "author": "Michael Fedora",
   "homepage_url": "https://github.org/michaelfedora/unofficial-blockstack-extension",
 
-
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "description": "Adds Blockstack support to the Web Browser.",
   "icons": {

@@ -17,7 +17,7 @@ return {
   mode: production ? 'production' : 'development',
   entry: {
     'bs-ext-background': path.resolve(__dirname, 'src', 'background', 'background.ts'),
-    // 'bs-ext-main': path.resolve(__dirname, 'src', 'main', 'main.ts'),
+    'bs-ext-main': path.resolve(__dirname, 'src', 'main', 'main.ts'),
     'bs-ext-auth': path.resolve(__dirname, 'src', 'auth', 'main.ts'),
     'bs-ext-popup': path.resolve(__dirname, 'src', 'popup', 'main.ts')
   },
@@ -94,12 +94,12 @@ return {
     new ForkTsCheckWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css'
-    }),/*
+    }),
     new HtmlWebpackPlugin({
       chunks: ['bs-ext-main'],
       template: 'src/main/index.html',
       filename: 'main.html'
-    }),*/
+    }),
     new HtmlWebpackPlugin({
       chunks: ['bs-ext-auth'],
       template: 'src/auth/index.html',

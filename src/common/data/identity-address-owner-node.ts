@@ -1,5 +1,8 @@
-import { HDNode } from 'bitcoinjs-lib';
+import bip32 from 'bip32';
+// @ts-ignore
+import { payments } from 'bitcoinjs-lib';
 import { AppsNode } from './apps-node';
+import { WrappedNode } from './wrapped-node';
 
 const APPS_NODE_INDEX = 0
 const SIGNING_NODE_INDEX = 1
@@ -13,36 +16,32 @@ export interface KeyPair {
   salt: string;
 }
 
-export class IdentityAddressOwnerNode {
+export class IdentityAddressOwnerNode extends WrappedNode {
 
-  private _node: HDNode;
   private _salt: string;
 
   private _appsNode: AppsNode;
 
-  constructor(node: HDNode, salt: string) {
-    this._node = node;
+  constructor(node: bip32, salt: string) {
+    super(node);
     this._salt = salt;
     this._appsNode = new AppsNode(this.node.deriveHardened(APPS_NODE_INDEX), this.salt);
   }
 
-  get node() { return this._node; }
   get salt() { return this._salt; }
 
-  get identityKey() {
-    return (this.node.keyPair.d.toBuffer(32) as Buffer).toString('hex');
+  getIdentityKey() {
+    // @ts-ignore
+    return this.keyPair.privateKey.toString('hex');
   }
 
-  get identityKeyId() {
-    return this.node.keyPair.getPublicKeyBuffer().toString('hex');
+  getIdentityKeyId() {
+    // @ts-ignore
+    return this.keyPair.publicKey.toString('hex');
   }
 
   get appsNode() {
     return this._appsNode;
-  }
-
-  get address() {
-    return this.node.getAddress();
   }
 
   getEncryptionNode() {
@@ -55,9 +54,9 @@ export class IdentityAddressOwnerNode {
 
   get derivedIdentityKeyPair(): KeyPair {
     return {
-      key: this.identityKey,
-      keyId: this.identityKeyId,
-      address: this.address,
+      key: this.getIdentityKey(),
+      keyId: this.getIdentityKeyId(),
+      address: this.getAddress(),
       appsNodeKey: this.appsNode.toBase58(),
       salt: this.appsNode.salt
     };

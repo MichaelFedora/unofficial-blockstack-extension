@@ -1,13 +1,13 @@
 import { Module } from 'vuex';
-import { HDNode } from 'bitcoinjs-lib';
 import { WrappedKeychain } from '../../data/wrapped-keychain';
 import { AccountStateType, SATOSHIS_IN_BTC } from './types/account.state';
 import { StateType } from './types/state';
-import { decrypt, encrypt } from '../../util';
+import { decrypt, encrypt, getAddress } from '../../util';
 import { validateMnemonic, mnemonicToSeed } from 'bip39';
 import { KeyPair } from '../../data/identity-address-owner-node';
 import Axios from 'axios';
 import { config, transactions } from 'blockstack';
+import { WrappedNode } from '../../data/wrapped-node';
 
 function makeState(): AccountStateType {
   return  {
@@ -86,7 +86,7 @@ export const accountModule: Module<AccountStateType, StateType> = {
       identitiesToGenerate?: number
     }) {
       identitiesToGenerate = (identitiesToGenerate && identitiesToGenerate >= 1) ? identitiesToGenerate : 1;
-      const wrapped = new WrappedKeychain(HDNode.fromBase58(masterKeychain));
+      const wrapped = new WrappedKeychain(WrappedNode.fromBase58(masterKeychain));
       const firstBitcoinAddress = wrapped.getFirstBitcoinAddress().getAddress();
       const identityAddresses = [];
       const identityKeypairs = [];
@@ -122,7 +122,7 @@ export const accountModule: Module<AccountStateType, StateType> = {
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
 
       const seedBuffer = mnemonicToSeed(phrase);
-      const masterKeychain = HDNode.fromSeedBuffer(seedBuffer);
+      const masterKeychain = WrappedNode.fromSeed(seedBuffer);
       const wrapped = new WrappedKeychain(masterKeychain);
       const nextIdentityIndex = state.identityAccount.addressIndex;
       const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(nextIdentityIndex)
@@ -160,11 +160,12 @@ export const accountModule: Module<AccountStateType, StateType> = {
       const phrase = await decrypt(state.encryptedBackupPhrase, password);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
       const seedBuffer = mnemonicToSeed(phrase);
-      const masterKeychain = HDNode.fromSeedBuffer(seedBuffer);
+      const masterKeychain = WrappedNode.fromSeed(seedBuffer);
       const wrapped = new WrappedKeychain(masterKeychain);
 
       const btcAddressNode = wrapped.getBitcoinAddressNode(0);
-      const paymentKey = btcAddressNode.keyPair.d.toBuffer(32).toString('hex');
+      // @ts-ignore
+      const paymentKey = btcAddressNode.keyPair.privateKey.toString('hex');
 
       const amountSatoshis = Math.floor(amount * SATOSHIS_IN_BTC);
       transactions.makeBitcoinSpend(to, paymentKey, amountSatoshis)

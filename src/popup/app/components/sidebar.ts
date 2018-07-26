@@ -88,6 +88,9 @@ export default (Vue as VVue).component('bs-popup-sidebar', {
     exit() {
       this.$emit('update:toggle', false);
     },
+    gotoMain(hash: string) {
+      this.$emit('gotoMain', hash);
+    },
     logout() {
       dispatch('logout');
       this.exit();

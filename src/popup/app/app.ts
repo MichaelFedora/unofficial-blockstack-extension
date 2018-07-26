@@ -2,7 +2,7 @@ import ccopy from 'clipboard-copy';
 import Vue from 'vue';
 import { AppEntry } from '../../common/app-list';
 import { validateMnemonic, mnemonicToSeed, generateMnemonic } from 'bip39';
-import { HDNode } from 'bitcoinjs-lib';
+import bip32 from 'bip32';
 import { mapGetters } from 'vuex';
 import { randomBytes } from 'crypto';
 import { encrypt } from '../../common/util';
@@ -158,24 +158,25 @@ export default (Vue as VVue).extend({
     },
     initializeWallet() {
       console.log('Initializing Wallet!');
-      let masterKeychain: HDNode = null;
+      let masterKeychain: bip32 = null;
       if(this.phrase && validateMnemonic(this.phrase)) {
         const seedBuffer = mnemonicToSeed(this.phrase);
-        masterKeychain = HDNode.fromSeedBuffer(seedBuffer);
+        masterKeychain = bip32.fromSeed(seedBuffer);
       } else if(!this.phrase) {
         this.phrase = generateMnemonic(128, randomBytes);
         const seedBuffer = mnemonicToSeed(this.phrase);
-        masterKeychain = HDNode.fromSeedBuffer(seedBuffer);
+        masterKeychain = bip32.fromSeed(seedBuffer);
       } else {
         throw new Error('Tried to initialize a wallet with a bad phrase');
       }
       return encrypt(this.phrase, this.pass).then(encryptedBackupPhrase => {
-        console.log('Creating account w/ enc phrase: ' + encryptedBackupPhrase + '!');
+        console.log('Creating account w/ enc phrase: "' + encryptedBackupPhrase + '"!');
         return dispatch('account/createAccount',
               { email: this.email, encryptedBackupPhrase, masterKeychain: masterKeychain.toBase58() });
       });
     },
     initializeIdentity() {
+      console.log('Initializing identity...');
       return dispatch('connectSharedService')
         .then(() => dispatch('identity/downloadAll') as Promise<boolean[]>)
         .then(results => Promise.all(results.map((a, i) => {
@@ -262,7 +263,7 @@ export default (Vue as VVue).extend({
     },
     async gotoMain(hash?: string) {
       console.warn('gotoMain called', hash);
-      /* const url = browser.extension.getURL('main.html');
+      const url = browser.extension.getURL('main.html');
       const win = await browser.windows.getCurrent({ populate: true });
       for(const tab of win.tabs) {
         if(tab.id >= 0 && tab.url && tab.url.length >= url.length && tab.url.slice(0, url.length) === url) {
@@ -272,7 +273,7 @@ export default (Vue as VVue).extend({
         }
       }
       browser.tabs.create({ url: (hash ? `${url}#${hash}` : url), active: true });
-      this.close();*/
+      this.close();
     }
   }
 });
