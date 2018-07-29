@@ -5,7 +5,7 @@
   </div>
 
   <div id='sidebar' v-if='sidebar'>
-    <bs-popup-sidebar :toggle.sync='sidebar' @gotoMain='gotoMain($event)'></bs-popup-sidebar>
+    <bs-popup-sidebar :toggle.sync='sidebar' @working='() => {}' @gotoMain='gotoMain($event)'></bs-popup-sidebar>
   </div>
 
   <template v-else>
@@ -22,7 +22,7 @@
 
   <template v-if='!loggedIn'>
   <div class='container' id='login' v-show='!view'>
-    <span class='has-text-danger' v-show='error'>{{error}}</span>
+    <span class='has-text-danger' :class='{ marg: error || logoutReason }' v-show='error || logoutReason'>{{error || logoutReason}}</span>
     <button class='button is-primary slim' @click='view = "restore"'>Restore Existing Keychain</button>
     <button class='button is-info slim' @click='view = "register"'>Create New Identity</button>
   </div>
@@ -126,6 +126,8 @@
     </div>
     <span class='has-text-danger' v-if='error'>{{error}}</span>
   </div>
+
+  <div v-if='dialogSpace' style='width: 20rem; height: 20rem;'></div>
   </template>
   </template>
 </div>
@@ -282,6 +284,9 @@
     > * {
       margin: 0;
     }
+    > span.marg {
+      margin-bottom: 1rem;
+    }
     > :not(span):not(:last-child) {
       margin-bottom: 1rem;
     }
@@ -289,7 +294,7 @@
 
   div#loader {
     position: absolute;
-    z-index: 2;
+    z-index: 1024;
     top: 0;
     left: 0;
     right: 0;

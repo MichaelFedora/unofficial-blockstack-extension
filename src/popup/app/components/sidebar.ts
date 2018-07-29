@@ -12,7 +12,8 @@ export default (Vue as VVue).component('bs-popup-sidebar', {
   },
   data() {
     return {
-      removing: {} as {[key: string]: boolean}
+      removing: {} as {[key: string]: boolean},
+      deriving: false,
     }
   },
   computed: {
@@ -58,8 +59,10 @@ export default (Vue as VVue).component('bs-popup-sidebar', {
         });
       }).then(() => delete this.removing[index]);
     },
-    deriveNewIdentity() {
-      this.$dialog.prompt({
+    async deriveNewIdentity() {
+      if(this.deriving) return;
+      this.deriving = true;
+      await new Promise(resolve => this.$dialog.prompt({
         message: 'Enter your password to create another Identity',
         confirmText: 'Authenticate',
         inputAttrs: {
@@ -67,20 +70,38 @@ export default (Vue as VVue).component('bs-popup-sidebar', {
           type: 'password'
         },
         onConfirm: (value) => {
-          dispatch('account/createIdentity', { password: value }).then(() => {
+          this.$emit('working', true);
+          resolve(dispatch('account/createIdentity', { password: value }).then(async () => {
             const index = this.$store.state.identity.localIdentities.length - 1;
             const identity = this.$store.state.identity.localIdentities[index];
-            return dispatch('identity/download', { index })
-                  .catch(() => {
-                    console.warn(`No profile for the new identity ID-${identity.ownerAddress}: uploading!`);
-                    return dispatch('identity/upload', { index });
-                  }).then(() => this.$toast.open('Identity added!'));
+            const a = await dispatch('identity/download', { index }).then(() => true, () => false);
+            if(a) return this.$toast.open('Identity added!');
+            console.log('Trying to download profile for ID-' + this.$store.state.account.identityAccount.addresses[index] + ' again...');
+            const b = await dispatch('identity/download', { index }).then(() => true, () => false);
+            if(b) return this.$toast.open('Identity added!');
+            console.warn(`No profile for the new identity ID-${identity.ownerAddress}: asking what to do!`);
+            this.$emit('working', false);
+            const res = await new Promise(resolve2 => this.$dialog.confirm({
+              title: 'New ID - No Profile',
+              message: 'No profile found for this identity - create a new one?',
+              cancelText: 'Cancel',
+              confirmText: 'Go for it',
+              onConfirm: () => resolve2(true),
+              onCancel: () => resolve2(false)
+            }));
+            this.$emit('working', true);
+            if(res) {
+              await dispatch('identity/upload', { index });
+              this.$toast.open('Identity added!');
+            } else commit('identity/remove', { index });
           }).catch(e => {
             console.error('Error creating identity:', e);
             this.$dialog.confirm({ message: 'Error creating identity: ' + e });
-          });
+          }));
         }
-      });
+      }));
+      this.$emit('working', false);
+      this.deriving = false;
     },
     switchProfile(index: number) {
       commit('identity/setDefault', { index });

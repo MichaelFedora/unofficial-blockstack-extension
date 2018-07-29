@@ -60,14 +60,27 @@ export default (Vue as VVue).component('bs-main-change-password', {
           type: 'password'
         },
         onConfirm: (value) => {
-          dispatch('account/createIdentity', { password: value }).then(() => {
+          dispatch('account/createIdentity', { password: value }).then(async () => {
             const index = this.$store.state.identity.localIdentities.length - 1;
             const identity = this.$store.state.identity.localIdentities[index];
-            return dispatch('identity/download', { index })
-                  .catch(() => {
-                    console.warn(`No profile for the new identity ID-${identity.ownerAddress}: uploading!`);
-                    return dispatch('identity/upload', { index });
-                  }).then(() => this.$toast.open('Identity added!'));
+            const a = await dispatch('identity/download', { index }).then(() => true, () => false);
+            if(a) return this.$toast.open('Identity added!');
+            console.log('Trying to download profile for ID-' + this.$store.state.account.identityAccount.addresses[index] + ' again...');
+            const b = await dispatch('identity/download', { index }).then(() => true, () => false);
+            if(b) return this.$toast.open('Identity added!');
+            console.warn(`No profile for the new identity ID-${identity.ownerAddress}: asking what to do!`);
+            const res = await new Promise(resolve => this.$dialog.confirm({
+              title: 'New Identity - Profile not Found',
+              message: 'No profile found for this identity - create a new one?',
+              cancelText: 'Cancel',
+              confirmText: 'Go for it',
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false)
+            }));
+            if(res) {
+              await dispatch('identity/upload', { index });
+              return this.$toast.open('Identity added!');
+            }
           }).catch(e => {
             console.error('Error creating identity:', e);
             this.$dialog.confirm({ message: 'Error creating identity: ' + e });

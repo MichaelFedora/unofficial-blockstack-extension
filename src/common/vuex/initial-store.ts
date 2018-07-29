@@ -16,6 +16,9 @@ function makeState(): StateType {
     },
     settings: {
       api: makeDefaultApiClone()
+    },
+    meta: {
+      logoutReason: ''
     }
   };
 }
@@ -31,10 +34,14 @@ export const initialStore: StoreOptions<StateType> = {
   mutations: {
     updateApi(state, newApi: Partial<ApiSettingsType>) {
       state.settings.api = Object.assign({}, state.settings.api, newApi);
+    },
+    setLogoutReason(state, newReason: string) {
+      state.meta.logoutReason = newReason || '';
     }
   },
   actions: {
-    logout({ dispatch }) {
+    logout({ dispatch, commit }, reason?: string) {
+      commit('setLogoutReason', reason || '');
       return Promise.all([
         dispatch('account/reset'),
         dispatch('registration/reset'),

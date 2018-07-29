@@ -78,10 +78,17 @@ console.log('Initial loading of Blockstack Extension done!')
 Promise.all([
   store.dispatch('connectSharedService')
     .then(() => store.dispatch('identity/downloadAll') as Promise<boolean[]>)
-    .then(results => Promise.all(results.map((a, i) => {
+    .then(results => Promise.all(results.map(async (a, i) => {
       if(a) return Promise.resolve();
-      console.log('No profile for address ID-' + store.state.account.identityAccount.addresses[i] + '; uploading ours!');
-      return store.dispatch('identity/upload', { index: i });
+      const addrId = store.state.account.identityAccount.addresses[i];
+      console.log('Trying to download profile for ID-' + addrId + ' again...');
+      const b = await store.dispatch('identity/download', { index: i }).then(() => true, () => false);
+      if(b) return Promise.resolve();
+      console.log('No profile (after two tries) for address ID-' + addrId + '; logging out!');
+      const errReason = `Couldn't fetch profile for ` + (i === 0 ? 'the main' : `a derived(${i})`) + ` identity ID-${addrId}.`;
+      await store.dispatch('logout', errReason);
+      throw new Error(errReason);
+      // return store.dispatch('identity/upload', { index: i });
     })))
     .then(() => console.log('Connected to shared service & initialized identity!'),
           err => console.error('Error connecting to shared service & initializing identity:', err)),

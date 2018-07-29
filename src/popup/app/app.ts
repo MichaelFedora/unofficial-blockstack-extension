@@ -3,16 +3,17 @@ import Vue from 'vue';
 import { AppEntry } from '../../common/app-list';
 import { validateMnemonic, mnemonicToSeed, generateMnemonic } from 'bip39';
 import bip32 from 'bip32';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { randomBytes } from 'crypto';
 import { encrypt } from '../../common/util';
 import _ from 'lodash';
 import { FieldFlags } from 'vee-validate';
 import { browser } from 'webextension-polyfill-ts';
-import { dispatch } from 'common/vuex/remote-interface';
+import { dispatch, commit } from 'common/vuex/remote-interface';
 import { VVue } from 'common/vvue';
 
 import SidebarComponent from './components/sidebar';
+import { StateType } from 'common/vuex/stores/types/state';
 
 window.onbeforeunload = (ev) => {
   console.log('unloading!');
@@ -43,6 +44,8 @@ export default (Vue as VVue).extend({
       error: '',
       working: false,
 
+      dialogSpace: false,
+
       appIcons: { } as { [key: string]: string },
       erroredIcons: { } as { [key: string]: number }
     }
@@ -51,6 +54,9 @@ export default (Vue as VVue).extend({
     ...mapGetters({
       loggedIn: 'account/isLoggedIn',
       defaultId: 'identity/defaultId',
+    }),
+    ...mapState({
+      logoutReason: (state: StateType) => state.meta.logoutReason
     }),
     fullForm: function() {
       return ((this.view === 'restore' ? this.phrase : true) && this.pass && this.confirm) ? true : false;
@@ -108,6 +114,7 @@ export default (Vue as VVue).extend({
       this.confirm = '';
       this.error = '';
       this.search = '';
+      if(this.$store.state.meta.logoutReason) commit('setLogoutReason', '');
       this.$validator.reset();
     },
     loggedIn(n) {
@@ -179,11 +186,32 @@ export default (Vue as VVue).extend({
       console.log('Initializing identity...');
       return dispatch('connectSharedService')
         .then(() => dispatch('identity/downloadAll') as Promise<boolean[]>)
-        .then(results => Promise.all(results.map((a, i) => {
-          if(a) return Promise.resolve();
-          console.log('No profile for address ID-' + this.$store.state.account.identityAccount.addresses[i] + '; uploading ours!');
-          return dispatch('identity/upload', { index: i });
-        })));
+        .then(async results => {
+          for(let i = 0, a = results[0]; i < results.length; a = results[++i]) {
+            if(a) continue;
+            const addrId = this.$store.state.account.identityAccount.addresses[i];
+            console.log('Trying to download profile for ID-' + addrId + ' again...');
+            const b = await dispatch('identity/download', { index: i }).then(() => true, () => false);
+            if(b) continue;
+            console.log('No profile (after two tries) for address ID-' + addrId + '.');
+            this.dialogSpace = true;
+            this.working = false;
+            const res = await new Promise(resolve => this.$dialog.confirm({
+              title: 'Login - No Profile',
+              message: 'No profile found for ' + (i === 0 ? 'the main' : `a derived (${i})`) + ` identity ID-${addrId} - create a new one?`,
+              cancelText: 'Cancel & Logout',
+              confirmText: 'Go for it',
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false)
+            }));
+            this.working = true;
+            this.dialogSpace = false;
+            if(res) {
+              await dispatch('identity/upload', { i });
+              console.log('Uploaded profile for ID {' + i + '}!');
+            } else { await dispatch('logout'); this.working = false; return; }
+          }
+        });
     },
     restore() {
       console.log('Restoring!');

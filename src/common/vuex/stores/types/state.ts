@@ -14,7 +14,12 @@ export interface StateType {
     coreApiRunning: boolean,
     coreApiPasswordValid: boolean
   };
+
   settings: {
     api: ApiSettingsType
+  };
+
+  meta: {
+    logoutReason: string
   };
 };
