@@ -46,10 +46,11 @@ export function initializeRemoteMaster<S = any>(store: Store<S>) {
       return Promise.resolve(JSON.stringify(store.state));
     } else if(msg.type === RemoteMessageType.INVOKE_ACTION)
       return store.dispatch(msg.data.type, msg.data.payload, msg.data.options)
-                  .then(a => a != null ? JSON.stringify(a) : a);
+                  .then(a => a != null ? JSON.stringify(a) : a)
+                  .then(a => new Promise( resolve => setTimeout(resolve(a)) ));
     else if(msg.type === RemoteMessageType.INVOKE_MUTATION) {
       store.commit(msg.data.type, msg.data.payload, msg.data.options);
-      return Promise.resolve();
+      return new Promise(resolve => setTimeout(resolve()));
     }
   });
 
