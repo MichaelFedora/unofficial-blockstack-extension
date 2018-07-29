@@ -145,17 +145,16 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         ownerAddress = rootState.account.identityAccount.addresses[index];
       return rootState.settings.api.gaiaUrlBase + '/' + ownerAddress + '/profile.json';
     },
-    async getProfileUploadLocation({ state, getters, rootState }, payload: { index?: number }) {
-      let index;
-      if(!payload || !payload.index) index = state.default;
-      else index = payload.index;
+    async getProfileUploadLocation({ state, getters, rootState }, index?: number) {
+      index = index || state.default;
 
-      const zoneFile = getters.getZoneFile(index)
+      const zoneFile = getters.getZoneFile(index);
       const gaiaHubConfig = rootState.settings.api.gaiaHubConfig;
-      if(!zoneFile) return gaiaHubConfig.url_prefix + gaiaHubConfig.address + '/profile.json';
+      // using idaccount addr instead of `gaiaHubConfig.address`
+      if(!zoneFile) return gaiaHubConfig.url_prefix + rootState.account.identityAccount.addresses[index] + '/profile.json';
       else return getters.getTokenFileUrl(index);
     },
-    async resolveProfile({ state, getters, rootState }, { publicKeyOrAddress }: { publicKeyOrAddress: string }) {
+    async resolveProfile({ getters }, { publicKeyOrAddress }: { publicKeyOrAddress: string }) {
       const zoneFile = getters.getZoneFile();
       const tokenFileUrl = getters.getTokenFileUrl();
 
@@ -190,7 +189,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         return { };
       }
     },
-    async downloadProfiles({ commit, state, dispatch, rootState }, { index }: { index?: number }) {
+    async downloadProfiles({ state, dispatch, rootState }, { index }: { index?: number }) {
       index = index || state.default;
       const gaiaUrlBase = rootState.settings.api.gaiaUrlBase;
       const firstAddress = rootState.account.identityAccount.keypairs[0].address;
@@ -221,14 +220,18 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       console.warn('No profile data found...');
       return;
     },
-    download({ commit, state, dispatch, rootState}, { address, index }: { address?: string, index: number }) {
-      const addr = address || rootState.account.identityAccount.addresses[index];
+    download({ commit, state, dispatch, rootState}, { index }: { index: number }) {
+      const addr = rootState.account.identityAccount.addresses[index];
+      if(!addr) {
+        console.error('identity/download: index out of range: ', index);
+        throw new Error('Cannot download identity from address which index is out of range!');
+      }
       if(!state.localIdentities[index])
         commit('create', { ownerAddress: addr });
       const url = rootState.settings.api.bitcoinAddressLookupUrl.replace('{address}', addr);
       return axios.get(url).then(res => {
         if(res.data.names.length === 0) {
-          console.log('Address ' + addr + 'has no names, checking default locations.');
+          console.log('Address ' + addr + ' has no names, checking default locations.');
           return dispatch('downloadProfiles', { index: index }).then((data?: any) => {
             if(!(data && data.profile)) throw new Error('No profile data found!');
             commit('update', { index: index, payload: { profile: data.profile, zoneFile: '' } });
@@ -240,7 +243,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
             payload: { username: res.data.names[0], usernames: res.data.names, usernamePending: false, usernameOwned: true }
           });
 
-          /** Make it so it falls-back to other usernames */
+          /** Todo?: Make it so it falls-back to other usernames */
           const lookupUrl = rootState.settings.api.nameLookupUrl.replace('{name}', res.data.names[0]);
           return axios.get(lookupUrl).then(lookupRes => {
             if(!lookupRes.data || !lookupRes.data.zonefile || !lookupRes.data.address) {
@@ -250,15 +253,18 @@ export const identityModule: Module<IdentityStateType, StateType> = {
             return resolveZoneFileToProfile(lookupRes.data.zonefile, lookupRes.data.address).then(profile => {
               if(!profile) throw new Error('No profile data found!');
               commit('update', { index: index, payload: { profile, zoneFile: lookupRes.data.zonefile} });
-            })
+            }, (e) => { console.error(e); return Promise.reject(e); });
           });
         }
       });
     },
     downloadAll({ dispatch, rootState }) {
-      return Promise.all(rootState.account.identityAccount.addresses
-        .map((address, index) => dispatch('download', { address, index }))
-        .map(p => p.then(() => true, () => false)));
+      const proms = [];
+      const numAddrs = rootState.account.identityAccount.addresses.length;
+      for(let i = 0; i < numAddrs; i++) {
+        proms.push(dispatch('download', { index: i }).then(() => true, () => false));
+      }
+      return Promise.all(proms);
     },
     async upload({ dispatch, state, rootState }, { index }: { index?: number }) {
       index = index || state.default;
@@ -268,9 +274,9 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keypair.key);
       const globalHubConfig = rootState.settings.api.gaiaHubConfig;
 
-      const url: string = await dispatch('getProfileUploadLocation');
+      const url: string = await dispatch('getProfileUploadLocation', index);
       const profile = state.localIdentities[index].profile;
-      const token = signProfileToken(profile, keypair.key);
+      const token = signProfileToken(profile, keypair.key, { publicKey: keypair.keyId });
       const tokenRecords = [ wrapProfileToken(token) ];
 
       const signedProfileData = JSON.stringify(tokenRecords, null, 2);
@@ -290,7 +296,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
 
       const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keypair.key);
 
-      let profileUploadLoc: string = await dispatch('getProfileUploadLocation', { index });
+      let profileUploadLoc: string = await dispatch('getProfileUploadLocation', index);
       if(profileUploadLoc.endsWith('profile.json'))
         profileUploadLoc = profileUploadLoc.substr(0, profileUploadLoc.length - 'profile.json'.length);
       else
