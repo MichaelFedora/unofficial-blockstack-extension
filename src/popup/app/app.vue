@@ -112,7 +112,7 @@
       <div class='results-apps'>
         <a v-for='app of recommendedApps' :key='app.name' @click='gotoApp(app)'>
           <img :src='appIcons[app.name]' @error='incrementError(app)'>
-          <span>{{app.displayName}}</span>
+          <span>{{app.displayName || app.name}}</span>
         </a>
       </div>
     </div>
@@ -120,7 +120,7 @@
       <div class='results-apps'>
         <a v-for='app of appResults' :key='app.name' @click='gotoApp(app)'>
           <img :src='appIcons[app.name]' @error='incrementError(app)'>
-          <span>{{app.displayName}}</span>
+          <span>{{app.displayName || app.name}}</span>
         </a>
       </div>
       <span v-show='search.length > 0 && appResults.length === 0'>Nothing found!</span>

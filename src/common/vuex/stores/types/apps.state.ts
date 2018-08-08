@@ -1,9 +1,9 @@
-import { AppEntry } from '../../../app-list';
+import { AppEntry } from '../../../data/app-entry';
 
 export interface AppsStateType {
   apps: AppEntry[];
-  recent: { name: string, appIcon: { small: string }, launchLink: string }[];
-  version: string;
+  recent: AppEntry[];
+  // version: string;
   lastUpdated: number;
   instanceIdentifier: string;
   instanceCreationDate: number;

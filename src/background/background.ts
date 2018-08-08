@@ -2,7 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 import { browser } from 'webextension-polyfill-ts';
-import initialStore from '../common/vuex/initial-store';
+import initialStore from 'common/vuex/initial-store';
 import { initializeRemoteMaster } from 'common/vuex/remote-interface';
 
 Vue.use(Vuex);
@@ -22,7 +22,7 @@ if(browser.runtime.lastError && browser.runtime.lastError.message)
 
 // one day return user profiles too eh?
 function search(text: string) {
-  return store.state.apps.apps.filter(a => a.displayName.substr(0, text.length).toLowerCase() === text.toLowerCase());
+  return store.state.apps.apps.filter(a => a.name.substr(0, text.length).toLowerCase() === text.toLowerCase());
 }
 
 browser.webRequest.onBeforeRequest.addListener((details) => {
@@ -70,7 +70,7 @@ browser.webRequest.onBeforeRequest.addListener((details) => {
       const matchingApps = search(match[1]);
       return { redirectUrl: 'data:application/json,' + JSON.stringify([
         match[1],
-        matchingApps.map(a => a.displayName)
+        matchingApps.map(a => a.name)
       ]) }; // still doesn't work :(
     }*/
   },
@@ -89,7 +89,7 @@ browser.omnibox.onInputEntered.addListener((text, disposition) => {
   const app = store.state.apps.apps.find(a => a.name.toLowerCase() === text.toLowerCase());
   if(app) {
     browser.tabs.update({
-      url: app.launchLink
+      url: app.website
     });
   } else {
     browser.tabs.update({
@@ -119,7 +119,7 @@ Promise.all([
           err => console.error('Error connecting to shared service & initializing identity:', err)),
 
   store.dispatch('apps/updateAppList').then(
-    () => console.log('Updated app list! Version: ' + store.state.apps.version),
+    () => console.log('Updated app list! Last Updated: ' + store.state.apps.lastUpdated),
     err => console.error('Error updating app list:', err))
 ]).then(() => {
   console.log('Loaded Blockstack Extension!')

@@ -1,11 +1,11 @@
 import ccopy from 'clipboard-copy';
 import Vue from 'vue';
-import { AppEntry } from '../../common/app-list';
+import { AppEntry } from 'common/data/app-entry';
 import { validateMnemonic, mnemonicToSeed, generateMnemonic } from 'bip39';
 import bip32 from 'bip32';
 import { mapGetters, mapState } from 'vuex';
 import { randomBytes } from 'crypto';
-import { encrypt } from '../../common/util';
+import { encrypt } from 'common/util';
 import _ from 'lodash';
 import { FieldFlags } from 'vee-validate';
 import { browser } from 'webextension-polyfill-ts';
@@ -20,7 +20,7 @@ window.onbeforeunload = (ev) => {
   return null;
 };
 
-const recommendedAppNames = ['Todo App', 'Hello, Blockstack', 'Blockstack Forum', 'Graphite'];
+const recommendedAppNames = ['Graphite', 'Diffuse', 'Note Riot', 'Stealthy', 'Travelstack', 'Lio'];
 
 export default (Vue as VVue).extend({
   components: { ProfileComponent },
@@ -80,21 +80,21 @@ export default (Vue as VVue).extend({
           defaultIdentity.profile.image[0]) ?
           defaultIdentity.profile.image[0].contentUrl : '';
     },
-    recentApps: function() {
+    recentApps() {
       const ret = (this.$store.state.apps.recent && this.$store.state.apps.recent.slice(0, 5)) || [];
       for(const app of ret)
         if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.appIcon.small);
+          Vue.set(this.appIcons, app.name, app.imageUrl);
       return ret;
     },
     recommendedApps: function() {
       const ret = this.$store.state.apps.apps
-            .filter(a => recommendedAppNames.find(b => a.displayName === b || a.name === b) &&
+            .filter(a => recommendedAppNames.find(b => a.name === b) &&
                         !this.recentApps.find(b => b.name === a.name));
 
       for(const app of ret)
         if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.appIcon.small);
+          Vue.set(this.appIcons, app.name, app.imageUrl);
 
       return ret;
     }
@@ -138,8 +138,8 @@ export default (Vue as VVue).extend({
       else
         this.erroredIcons[app.name]++;
 
-      if(app.appIcon.small.startsWith('http') && this.erroredIcons[app.name] === 1) {
-        this.appIcons[app.name] = app.appIcon.small.replace(
+      if(app.imageUrl.startsWith('http') && this.erroredIcons[app.name] === 1) {
+        this.appIcons[app.name] = app.imageUrl.replace(
             'http://blockstack-browser-server.appartisan.com/static/images/',
             'https://browser.blockstack.org/images/');
       } else this.appIcons[app.name] = 'assets/images/icon-48.png';
@@ -152,16 +152,16 @@ export default (Vue as VVue).extend({
       if(!n) { this.appResults.splice(0, this.appResults.length); this.resultCount = 0; return; }
       n = n.toLocaleLowerCase();
       const res = this.$store.state.apps.apps
-        .map((app: AppEntry) => [app, app.displayName.toLocaleLowerCase().indexOf(n)] as [AppEntry, number])
+        .map((app: AppEntry) => [app, app.name.toLocaleLowerCase().indexOf(n)] as [AppEntry, number])
         .filter(([app, score]) => score >= 0)
-        .sort((a, b) => (a[1] - b[1]) || a[0].displayName.localeCompare(b[0].displayName))
+        .sort((a, b) => (a[1] - b[1]) || a[0].name.localeCompare(b[0].name))
         .map(a => a[0]);
       this.resultCount = res.length;
       if(res.length > 5) res.length = 5;
       this.appResults.splice(0, this.appResults.length, ...res);
       for(const app of this.appResults)
         if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.appIcon.small);
+          Vue.set(this.appIcons, app.name, app.imageUrl);
     },
     initializeWallet() {
       console.log('Initializing Wallet!');
@@ -280,13 +280,13 @@ export default (Vue as VVue).extend({
     async gotoApp(app: AppEntry) {
       const win = await browser.windows.getCurrent({ populate: true });
       for(const tab of win.tabs) {
-        if(tab.id && tab.url && tab.url.length >= app.launchLink.length && tab.url.slice(0, app.launchLink.length) === app.launchLink) {
+        if(tab.id && tab.url && tab.url.length >= app.website.length && tab.url.slice(0, app.website.length) === app.website) {
           browser.tabs.update(tab.id, { active: true });
           this.close();
           return;
         }
       }
-      browser.tabs.create({ url: app.launchLink, active: true });
+      browser.tabs.create({ url: app.website, active: true });
       this.close();
     },
     async gotoMain(hash?: string) {

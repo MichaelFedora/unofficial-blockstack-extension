@@ -12,16 +12,17 @@ import {
 
 import bip32 from 'bip32';
 
-import { VALID_AUTH_SCOPES, validateAuthScopes, AuthTokenHeader, AuthTokenPayload } from '../../common/token-util';
+import { VALID_AUTH_SCOPES, validateAuthScopes, AuthTokenHeader, AuthTokenPayload } from 'common/token-util';
 import { decodeToken } from 'jsontokens'
 import { browser } from 'webextension-polyfill-ts';
 
-import { AppNode } from '../../common/data/app-node';
+import { AppNode } from 'common/data/app-node';
 
-import { StateType } from '../../common/vuex/stores/types/state';
+import { StateType } from 'common/vuex/stores/types/state';
 import { Store, mapGetters, mapState } from 'vuex';
 import { parseQuery } from 'common/util';
 import { dispatch, commit } from 'common/vuex/remote-interface';
+import { AppEntry } from 'common/data/app-entry';
 
 export function appRequestSupportsDirectHub(requestPayload: any) {
   return (
@@ -238,7 +239,7 @@ export default (Vue as VueConstructor<VVue>).extend({
 
         // (DNE): commit('removeCoreSessionToken', appDomain);
 
-        commit('apps/addRecent', { name: this.app.name, appIcon: { small: this.app.icon }, launchLink: this.app.url })
+        commit('apps/addRecent', { name: this.app.name, imageUrl: this.app.icon, website: this.app.url } as AppEntry)
 
         if(window.history.length > 1) {
           redirectUserToApp(this.authRequest, authResponse);
