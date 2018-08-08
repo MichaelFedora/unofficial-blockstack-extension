@@ -14,13 +14,12 @@ import { VVue } from 'common/vvue';
 
 import ProfileComponent from './components/profile';
 import { StateType } from 'common/vuex/stores/types/state';
+import { RecommendedAppNames } from 'common/recommended-apps';
 
 window.onbeforeunload = (ev) => {
   console.log('unloading!');
   return null;
 };
-
-const recommendedAppNames = ['Graphite', 'Diffuse', 'Note Riot', 'Stealthy', 'Travelstack', 'Lio'];
 
 export default (Vue as VVue).extend({
   components: { ProfileComponent },
@@ -89,8 +88,8 @@ export default (Vue as VVue).extend({
     },
     recommendedApps: function() {
       const ret = this.$store.state.apps.apps
-            .filter(a => recommendedAppNames.find(b => a.name === b) &&
-                        !this.recentApps.find(b => b.name === a.name));
+            .filter(a => RecommendedAppNames.find(b => a.name === b) &&
+                        !this.recentApps.find(b => b.name === a.name || a.website === b.website));
 
       for(const app of ret)
         if(!this.appIcons[app.name])
