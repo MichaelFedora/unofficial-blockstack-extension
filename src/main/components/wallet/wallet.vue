@@ -39,7 +39,7 @@
           <b-input v-validate='"required"' name='password' placeholder='password' type='password' v-model='pass'></b-input>
         </b-field>
       </form>
-      <button class='button is-primary' style='align-self: flex-end' :disabled='!(recipent && amount && pass) || errors.any()'>Send</button>
+      <button class='button is-primary' style='align-self: flex-end' :disabled='!(recipient && amount && pass) || errors.any()'>Send</button>
     </div>
   </div>
 </div>

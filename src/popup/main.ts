@@ -2,10 +2,10 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import Buefy from 'buefy';
 import VeeValidate from 'vee-validate';
-import initialStore from '../common/vuex/initial-store';
+import initialStore from 'common/vuex/initial-store';
 
 import AppComponent from './app/app';
-import BsLoadingComponent from '../common/components/bs-loading/bs-loading';
+import BsLoadingComponent from 'common/components/bs-loading/bs-loading';
 
 import '@mdi/font/css/materialdesignicons.css';
 import 'buefy/lib/buefy.css';

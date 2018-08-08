@@ -3,7 +3,7 @@ import Vuex, { mapGetters } from 'vuex';
 import VeeValidate from 'vee-validate';
 import Buefy from 'buefy';
 
-import { initialStore } from '../common/vuex/initial-store';
+import { initialStore } from 'common/vuex/initial-store';
 
 import AppComponent from './app/app';
 import BsLoadingComponent from 'common/components/bs-loading/bs-loading';
