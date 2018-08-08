@@ -20,8 +20,12 @@ console.log('Got UUID: ', uuid);
 if(browser.runtime.lastError && browser.runtime.lastError.message)
   console.error('lastError:', browser.runtime.lastError.message);
 
-browser.webRequest.onBeforeRequest.addListener(
-  (details) => {
+// one day return user profiles too eh?
+function search(text: string) {
+  return store.state.apps.apps.filter(a => a.displayName.substr(0, text.length).toLowerCase() === text.toLowerCase());
+}
+
+browser.webRequest.onBeforeRequest.addListener((details) => {
     if(/^data:/.test(details.url) || /\.(png|jpg)$/.test(details.url)) return;
     console.log('going places!', details.url);
 
@@ -51,7 +55,24 @@ browser.webRequest.onBeforeRequest.addListener(
 
       // return { cancel: true };
       return { redirectUrl: 'javascript:' };
-    }
+    }/* else if(/blockstack\.org\/browser\/search/.test(details.url)) {
+      const match = /blockstack\.org\/browser\/search\/?\?q=(.*)/.exec(details.url);
+      if(!match || match.length < 2) return;
+      const url = browser.extension.getURL('main.html#/search?q=' + match[1] + '');
+      if(details.tabId >= 0)
+        browser.tabs.update(details.tabId, { url })
+      else
+        browser.tabs.update({ url })
+
+    } else if(/blockstack\.org\/browser\/suggest/.test(details.url)) {
+      const match = /blockstack\.org\/browser\/suggest\/?\?q=(.*)/.exec(details.url);
+      if(!match || match.length < 2) return { redirectUrl: JSON.stringify(['', []]) };
+      const matchingApps = search(match[1]);
+      return { redirectUrl: 'data:application/json,' + JSON.stringify([
+        match[1],
+        matchingApps.map(a => a.displayName)
+      ]) }; // still doesn't work :(
+    }*/
   },
   {urls: ['<all_urls>']},
   // @ts-ignore
@@ -61,14 +82,18 @@ browser.webRequest.onBeforeRequest.addListener(
 
 // browser.omnibox.setDefaultSuggestion({ description: 'Search Blockstack' });
 browser.omnibox.onInputChanged.addListener((text, suggest) => {
-  const matchingApps = store.state.apps.apps.filter(a => a.displayName.substr(0, text.length).toLowerCase() === text.toLowerCase());
+  const matchingApps = search(text);
   suggest(matchingApps.map(a => ({ content: a.name, description: a.name + ': ' + a.description })));
 });
 browser.omnibox.onInputEntered.addListener((text, disposition) => {
   const app = store.state.apps.apps.find(a => a.name.toLowerCase() === text.toLowerCase());
   if(app) {
     browser.tabs.update({
-      url: app.launchLink // app ? app.launchLink : browser.extension.getURL('main.html#apps?search="' + text + '"')
+      url: app.launchLink
+    });
+  } else {
+    browser.tabs.update({
+      url: browser.extension.getURL('main.html#/search?q=' + text + '')
     });
   }
 });
@@ -99,7 +124,3 @@ Promise.all([
 ]).then(() => {
   console.log('Loaded Blockstack Extension!')
 }, err => console.error('Error loading blockstack extension:', err));
-
-
-
-
