@@ -12,14 +12,26 @@ use it at your own risk!
 
 ![screenshot-1](/gfx/screenshot-1.png)
 
+Forum discussion can be found [here](https://forum.blockstack.org/t/5414).
+
 ## Features
 
 - Creating/Recovering Accounts
 - Managing Multiple Identities
 - App Authentication
-- App lookup via [blockstack-browser's repo](https://blockstack-browser-server.appartisan.com/data)
+- App lookup via [app.co's repo](https://app-co-api.herokuapp.com/api/apps)
 
-## Downloads
+## Downloads (for Alpha Version)
+
+**This extension is in alpha, and may accidently overwrite your profile.json resulting in loss of:**
+
+- Profile Name
+- Profile Bio
+- Social Verifications
+- Ability for people who you shared files with to view those files
+- Breaking apps that rely on multi-player data storage
+
+**Don't use your normal Blockstack ID to test this with!**
 
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/u-blockstack-extension/)
 - [Chrome](https://chrome.google.com/webstore/detail/unofficial-blockstack-ext/ldkenndopbdlbphmdmnmanmkhcjahmnm)
@@ -39,14 +51,9 @@ web-ext run
 
 Where [web-ext](https://github.com/mozilla/web-ext) is the Mozilla web extension tester found on NPM.
 
-## Known Issues
-
-- No way to edit or update profile, register names, use wallet, etc
-  - Main component is still WIP and in `/src_archive` for now.
-
 ## License
 
-It's under [MPL-2.0](LICENSE.md), similar to the [Blockstack Browser](https://github.com/blockstack/blockstack-browser). It uses some [images](/src/assets/images/appIcons) and the [App List](src/common/app-list.ts), along with lots of translated logic from the Browser source.
+It's under [MPL-2.0](LICENSE.md), similar to the [Blockstack Browser](https://github.com/blockstack/blockstack-browser).
 
 Icons (`/src/assets/images/icon-16`, `icon-48`, `icon-128`, etc) are under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/), as well as project-graphics (found in `/gfx`).
 
