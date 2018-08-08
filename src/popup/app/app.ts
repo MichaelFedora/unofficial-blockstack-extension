@@ -12,7 +12,7 @@ import { browser } from 'webextension-polyfill-ts';
 import { dispatch, commit } from 'common/vuex/remote-interface';
 import { VVue } from 'common/vvue';
 
-import SidebarComponent from './components/sidebar';
+import ProfileComponent from './components/profile';
 import { StateType } from 'common/vuex/stores/types/state';
 
 window.onbeforeunload = (ev) => {
@@ -23,7 +23,7 @@ window.onbeforeunload = (ev) => {
 const recommendedAppNames = ['Todo App', 'Hello, Blockstack', 'Blockstack Forum', 'Graphite'];
 
 export default (Vue as VVue).extend({
-  components: { SidebarComponent },
+  components: { ProfileComponent },
   data() {
     return {
       loading: true,
@@ -39,7 +39,7 @@ export default (Vue as VVue).extend({
       appResults: [] as AppEntry[],
       resultCount: 0,
 
-      sidebar: false,
+      profileSidebar: false,
 
       error: '',
       working: false,

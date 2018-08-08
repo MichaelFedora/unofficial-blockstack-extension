@@ -4,19 +4,22 @@
     <bs-loading></bs-loading>
   </div>
 
-  <div id='sidebar' v-if='sidebar'>
-    <bs-popup-sidebar :toggle.sync='sidebar' @working='() => {}' @gotoMain='gotoMain($event)'></bs-popup-sidebar>
+  <div class='sidebar' v-if='profileSidebar'>
+    <bs-popup-profile :toggle.sync='profileSidebar' @working='() => {}' @gotoMain='gotoMain($event)'></bs-popup-profile>
   </div>
 
   <template v-else>
   <div id='header'>
     <figure><img src='/assets/images/icon-48.png'></figure>
     <h4 class='title is-5' style='position: relative'>Blockstack Extension</h4>
-    <a class='profile-avatar' v-if='loggedIn' @click='sidebar = true'>
+    <a class='profile-avatar' v-if='loggedIn' @click='profileSidebar = true'>
       <figure v-if='profileImg'><img :src='profileImg'></figure>
       <div v-else>
         <span>{{(profileName || '?')[0] }}</span>
       </div>
+    </a>
+    <a class='button is-inverted is-primary' @click='gotoMain()'>
+      <b-icon icon='launch'></b-icon>
     </a>
   </div>
 
@@ -162,7 +165,7 @@
     > figure {
       height: 1.5em;
       width: 1.5em;
-      margin-right: 0.5em;
+      margin-right: 0.4rem;
     }
     > h4 {
       text-align: left;
@@ -172,8 +175,13 @@
       margin: 0;
     }
 
+    > a.button {
+      display: flex;
+      margin-left: 0.4rem;
+    }
+
     a.profile-avatar {
-      margin-left: 0.5em;
+      margin-left: 0.4em;
       display: flex;
       align-items: center;
 
@@ -211,7 +219,7 @@
     }
   }
 
-  > div#sidebar {
+  > div.sidebar {
     height: 100%;
     width: 100%;
     z-index: 10;
