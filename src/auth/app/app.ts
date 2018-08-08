@@ -155,7 +155,7 @@ export default (Vue as VueConstructor<VVue>).extend({
 
         const json = JSON.parse(resText);
         if(json.address) {
-          const nameOwningAddress = json.address;
+          // const nameOwningAddress = json.address;
           if(json.address === identity.ownerAddress) {
             console.log('login: name has propageted on the network.');
             blockchainId = identity.username; // how odd...
@@ -189,9 +189,9 @@ export default (Vue as VueConstructor<VVue>).extend({
           profileUrlPromise = Promise.resolve(profileUrlFomZonefile);
       }
 
-      const gaiaBucketAddress = this.$store.state.account.identityAccount.keypairs[0].address;
-      const identityAddress = identityKeypair.address;
-      const gaiaUrlBase = this.$store.state.settings.api.gaiaUrlBase || 'https://gaia.blockstack.org/hub';
+      // const gaiaBucketAddress = this.$store.state.account.identityAccount.keypairs[0].address;
+      // const identityAddress = identityKeypair.address;
+      // const gaiaUrlBase = this.$store.state.settings.api.gaiaUrlBase || 'https://gaia.blockstack.org/hub';
 
       if(!profileUrlPromise)
         profileUrlPromise = dispatch('identity/downloadProfiles', { index: this.currentIdentityIndex }).then(res => {

@@ -3,7 +3,7 @@
   <nav class='navbar' style='width: 100%' role='navigation' aria-label='main navigation'>
     <div class='navbar-brand'>
       <router-link class='navbar-item hover-underline-child' to='/'>
-        <img src='/assets/images/blockstack-rounded-48x48.png' alt='Blockstack'>
+        <img src='/assets/images/icon-48.png' alt='Blockstack'>
         <span class='title is-5' style='position: relative'>Blockstack Extension</span>
       </router-link>
       <a role='button' class='navbar-burger' :class='{ "is-active": showMenu }' aria-label='menu' aria-expanded='false' @click='showMenu = !showMenu'>
