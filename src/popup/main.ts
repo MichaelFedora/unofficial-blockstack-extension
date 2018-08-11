@@ -6,6 +6,7 @@ import initialStore from 'common/vuex/initial-store';
 
 import AppComponent from './app/app';
 import BsLoadingComponent from 'common/components/bs-loading/bs-loading';
+import BsLoginComponent from 'common/components/bs-login/bs-login';
 
 import '@mdi/font/css/materialdesignicons.css';
 import 'buefy/lib/buefy.css';
@@ -25,7 +26,7 @@ const v = new Vue({
   el: '#app',
   store,
   data: { loaded: false },
-  components: { AppComponent, BsLoadingComponent },
+  components: { AppComponent, BsLoadingComponent, BsLoginComponent },
   render(h) {
     if(this.loaded) return h(AppComponent)
     else return makeInitializerComponent(h, BsLoadingComponent);

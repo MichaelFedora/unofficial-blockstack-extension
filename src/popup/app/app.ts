@@ -1,15 +1,9 @@
-import ccopy from 'clipboard-copy';
 import Vue from 'vue';
 import { AppEntry } from 'common/data/app-entry';
-import { validateMnemonic, mnemonicToSeed, generateMnemonic } from 'bip39';
-import bip32 from 'bip32';
 import { mapGetters, mapState } from 'vuex';
-import { randomBytes } from 'crypto';
-import { encrypt } from 'common/util';
 import _ from 'lodash';
-import { FieldFlags } from 'vee-validate';
 import { browser } from 'webextension-polyfill-ts';
-import { dispatch, commit } from 'common/vuex/remote-interface';
+import { dispatch } from 'common/vuex/remote-interface';
 import { VVue } from 'common/vvue';
 
 import ProfileComponent from './components/profile';
@@ -27,13 +21,6 @@ export default (Vue as VVue).extend({
     return {
       loading: true,
 
-      view: '',
-
-      phrase: '',
-      email: '',
-      pass: '',
-      confirm: '',
-
       search: '',
       appResults: [] as AppEntry[],
       resultCount: 0,
@@ -42,6 +29,7 @@ export default (Vue as VVue).extend({
 
       error: '',
       working: false,
+      loginDone: true,
 
       dialogSpace: false,
     }
@@ -52,7 +40,6 @@ export default (Vue as VVue).extend({
       defaultId: 'identity/defaultId',
     }),
     ...mapState({
-      logoutReason: (state: StateType) => state.meta.logoutReason,
       pinnedApps: (state: StateType) => state.apps.pinned,
       recentApps: (state: StateType) => state.apps.recent
     }),
@@ -61,9 +48,6 @@ export default (Vue as VVue).extend({
       return this.$store.state.apps.apps
             .filter(a => RecommendedAppNames.find(b => b === a.name))
             .filter(a => !visible.find(b => b.name === a.name));
-    },
-    fullForm: function() {
-      return ((this.view === 'restore' ? this.phrase : true) && this.pass && this.confirm) ? true : false;
     },
     profileName: function() {
       const identity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
@@ -89,20 +73,9 @@ export default (Vue as VVue).extend({
     console.log('Mounted popup!');
     this.loading = false;
     this.updateSearch = _.debounce(this._updateSearch, 150);
-    this.initializeIdentity().catch(e => console.log(`Couldn't initialize identity:`, e));
+    // this.initializeIdentity().catch(e => console.log(`Couldn't initialize identity:`, e));
   },
   watch: {
-    view(n) {
-      if(n !== 'showKey')
-        this.phrase = '';
-      this.pass = '';
-      this.email = '';
-      this.confirm = '';
-      this.error = '';
-      this.search = '';
-      if(this.$store.state.meta.logoutReason) commit('setLogoutReason', '');
-      this.$validator.reset();
-    },
     loggedIn(n) {
       this.error = '';
       console.log('loggedIn:', n);
@@ -113,14 +86,6 @@ export default (Vue as VVue).extend({
     }
   },
   methods: {
-    getType(field: FieldFlags, ignoreTouched?: boolean) {
-      if(!field || (!field.dirty && (ignoreTouched || !field.touched))) return '';
-      if(field.valid) return 'is-success';
-      return 'is-danger';
-    },
-    copy(text: string) {
-      ccopy(text);
-    },
     updateSearch(n?: string) { },
     _updateSearch(n?: string) {
       if(!n) { this.appResults.splice(0, this.appResults.length); this.resultCount = 0; return; }
@@ -134,115 +99,7 @@ export default (Vue as VVue).extend({
       if(res.length > 5) res.length = 5;
       this.appResults.splice(0, this.appResults.length, ...res);
     },
-    initializeWallet() {
-      console.log('Initializing Wallet!');
-      let masterKeychain: bip32 = null;
-      if(this.phrase && validateMnemonic(this.phrase)) {
-        const seedBuffer = mnemonicToSeed(this.phrase);
-        masterKeychain = bip32.fromSeed(seedBuffer);
-      } else if(!this.phrase) {
-        this.phrase = generateMnemonic(128, randomBytes);
-        const seedBuffer = mnemonicToSeed(this.phrase);
-        masterKeychain = bip32.fromSeed(seedBuffer);
-      } else {
-        throw new Error('Tried to initialize a wallet with a bad phrase');
-      }
-      return encrypt(this.phrase, this.pass).then(encryptedBackupPhrase => {
-        console.log('Creating account w/ enc phrase: "' + encryptedBackupPhrase + '"!');
-        return dispatch('account/createAccount',
-              { email: this.email, encryptedBackupPhrase, masterKeychain: masterKeychain.toBase58() });
-      });
-    },
-    initializeIdentity() {
-      console.log('Initializing identity...');
-      return dispatch('connectSharedService')
-        .then(() => dispatch('identity/downloadAll') as Promise<boolean[]>)
-        .then(async results => {
-          for(let i = 0, a = results[0]; i < results.length; a = results[++i]) {
-            if(a) continue;
-            const addrId = this.$store.state.account.identityAccount.addresses[i];
-            console.log('Trying to download profile for ID-' + addrId + ' again...');
-            const b = await dispatch('identity/download', { index: i }).then(() => true, () => false);
-            if(b) continue;
-            console.log('No profile (after two tries) for address ID-' + addrId + '.');
-            this.dialogSpace = true;
-            this.working = false;
-            const res = await new Promise(resolve => this.$dialog.confirm({
-              title: 'Login - No Profile',
-              message: 'No profile found for ' + (i === 0 ? 'the main' : `a derived (${i})`) + ` identity ID-${addrId} - create a new one?`,
-              cancelText: 'Cancel & Logout',
-              confirmText: 'Go for it',
-              onConfirm: () => resolve(true),
-              onCancel: () => resolve(false)
-            }));
-            this.working = true;
-            this.dialogSpace = false;
-            if(res) {
-              await dispatch('identity/upload', { i });
-              console.log('Uploaded profile for ID {' + i + '}!');
-            } else { await dispatch('logout'); this.working = false; return; }
-          }
-        });
-    },
-    restore() {
-      console.log('Restoring!');
-      this.email = '';
-      this.working = true;
-
-      if(!validateMnemonic(this.phrase)) {
-        console.error(this.error = 'Invalid keychain phrase entered!');
-        this.working = false;
-        return;
-      }
-
-      if(this.pass !== this.confirm) {
-        console.warn(this.error = 'Confirm-password is not equal to the password!')
-        this.working = false;
-        return;
-      }
-
-      this.initializeWallet()
-        .then(() => this.initializeIdentity())
-        .then(() => {
-          console.log('Successfully logged in!')
-          this.view = '';
-          this.working = false;
-        }).catch(e => {
-          console.error(this.error = 'Error finalizing restore: ' + e);
-          console.error(e);
-          this.view = 'restore';
-          this.working = false;
-      });
-    },
-    register() {
-      console.log('Registering!');
-      this.phrase = '';
-      this.working = true;
-
-      if(this.pass !== this.confirm) {
-        console.warn(this.error = 'Confirm-password is not equal to the password!')
-        this.working = false;
-        return;
-      }
-
-      this.initializeWallet()
-        .then(() => this.initializeIdentity())
-        .then(() => {
-          console.log('Registered! Phrase:', this.phrase);
-          this.view = 'showKey'
-          this.working = false;
-        },
-        e => {
-          console.error(this.error = 'Error finalizing after register: ' + e);
-          console.error(e);
-          this.view = 'register';
-          this.working = false;
-      });
-      this.view = 'showKey'
-      this.working = false;
-    },
     logout() {
-      this.view = '';
       dispatch('logout');
     },
     close() {
@@ -273,6 +130,10 @@ export default (Vue as VVue).extend({
       }
       browser.tabs.create({ url: (hash ? `${url}#${hash}` : url), active: true });
       this.close();
+    },
+    showDialog({ type, options }: { type: string, options: any }) {
+      if(this.$dialog[type])
+        this.$dialog[type](options);
     }
   }
 });
