@@ -1,26 +1,37 @@
-# TODO - Before 2019
+# TODO - v2
 
 - Finish Main View
-  - Add Main "Apps" Page
-    - Recent Apps
-    - Pinned/Favorited Apps
-    - "Promoted"(?) Apps
+  - Add Login Component
   - Add Search Apps Page
-    - Eventually add ability to search Profiles too
+    - Seperate into Pinned app results vs all "other" app results
   - Add Profile Editor/Page
-  - Adjust Wallet Page
+  - Adjust Wallet Page (Look & Feel)
   - Add Settings Page
-- Fix Backend Items
-  - Better App List Fetching (Switch to `app.co`)
-- Smooth out User Interface/Experience
-  - Add Login Component to the Main View
-  - Add Login Component to the Auth Popup(?)
+    - API Settings
+    - Extension Settings
+      - Show "Recommended Apps"
 - Find a better name :Y
 
-### TODO - Later
+# TODO - v3
+- Add the ability to have our own profile/userdata storage (`profile_ube.json`?)
+  - (encrypted) user data like number of aliases, recent/pinned apps, emails, etc.
+- Add "Store" Page to show all apps and sort by category (financial, etc) and "popularity" (via app.co)
+- Add email field to profile editor
+- Update Auth Popup to allow email scope
 
-- Add the ability to have our own profile/user data storage (`profile_ube.json`?)
-  - (encrypted) user data like number of aliases, recent/pinned apps, etc.
+
+#TODO - Later
+
+### Frontend
+
 - Add the ability to add more bitcoin wallet accounts (via encrypted recovery codes)
 - Add Notification Area when Gaia Inboxes get implemented
+- Add dedicated app pages that link from the store/search/home instead of hover descriptions
+- Add the ability to search user profiles via username
+  - Also add the ability to "pin" users (why?)
+- Add more extension settings
+  - Open in New Tab vs Same Tab
+
+### Backend
 - Reformat the State to be cleaner and not just "straight imports" from the Blockstack Browser
+- Move more of the login/logout logic to the background thread instead if it relying on the popups to be open
