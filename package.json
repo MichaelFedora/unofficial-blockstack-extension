@@ -22,6 +22,7 @@
     "vee-validate": "^2.0.9",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
+    "vuedraggable": "^2.16.0",
     "vuex": "^3.0.1",
     "vuex-persistedstate": "^2.5.4",
     "webextension-polyfill-ts": "^0.8.7",

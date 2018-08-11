@@ -44,9 +44,6 @@ export default (Vue as VVue).extend({
       working: false,
 
       dialogSpace: false,
-
-      appIcons: { } as { [key: string]: string },
-      erroredIcons: { } as { [key: string]: number }
     }
   },
   computed: {
@@ -55,8 +52,16 @@ export default (Vue as VVue).extend({
       defaultId: 'identity/defaultId',
     }),
     ...mapState({
-      logoutReason: (state: StateType) => state.meta.logoutReason
+      logoutReason: (state: StateType) => state.meta.logoutReason,
+      pinnedApps: (state: StateType) => state.apps.pinned,
+      recentApps: (state: StateType) => state.apps.recent
     }),
+    recommendedApps(): AppEntry[] {
+      const visible = [].concat(this.$store.state.apps.recent, this.$store.state.apps.pinned);
+      return this.$store.state.apps.apps
+            .filter(a => RecommendedAppNames.find(b => b === a.name))
+            .filter(a => !visible.find(b => b.name === a.name));
+    },
     fullForm: function() {
       return ((this.view === 'restore' ? this.phrase : true) && this.pass && this.confirm) ? true : false;
     },
@@ -78,24 +83,6 @@ export default (Vue as VVue).extend({
           defaultIdentity.profile.image &&
           defaultIdentity.profile.image[0]) ?
           defaultIdentity.profile.image[0].contentUrl : '';
-    },
-    recentApps() {
-      const ret = (this.$store.state.apps.recent && this.$store.state.apps.recent.slice(0, 5)) || [];
-      for(const app of ret)
-        if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.imageUrl);
-      return ret;
-    },
-    recommendedApps: function() {
-      const ret = this.$store.state.apps.apps
-            .filter(a => RecommendedAppNames.find(b => a.name === b) &&
-                        !this.recentApps.find(b => b.name === a.name || a.website === b.website));
-
-      for(const app of ret)
-        if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.imageUrl);
-
-      return ret;
     }
   },
   mounted() {
@@ -131,18 +118,6 @@ export default (Vue as VVue).extend({
       if(field.valid) return 'is-success';
       return 'is-danger';
     },
-    incrementError(app: AppEntry) {
-      if(!this.erroredIcons[app.name])
-        this.erroredIcons[app.name] = 1;
-      else
-        this.erroredIcons[app.name]++;
-
-      if(app.imageUrl.startsWith('http') && this.erroredIcons[app.name] === 1) {
-        this.appIcons[app.name] = app.imageUrl.replace(
-            'http://blockstack-browser-server.appartisan.com/static/images/',
-            'https://browser.blockstack.org/images/');
-      } else this.appIcons[app.name] = 'assets/images/icon-48.png';
-    },
     copy(text: string) {
       ccopy(text);
     },
@@ -158,9 +133,6 @@ export default (Vue as VVue).extend({
       this.resultCount = res.length;
       if(res.length > 5) res.length = 5;
       this.appResults.splice(0, this.appResults.length, ...res);
-      for(const app of this.appResults)
-        if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.imageUrl);
     },
     initializeWallet() {
       console.log('Initializing Wallet!');

@@ -42,6 +42,7 @@ export default (Vue as VueConstructor<VVue>).extend({
         icon: '',
         name: '',
         url: '',
+        description: '',
         scopes: Object.keys(VALID_AUTH_SCOPES).reduce((acc, v) => { acc[v] = false; return acc; }, {}) as typeof VALID_AUTH_SCOPES
       },
       userIds: [] as { userName?: string, name: string, givenName?: string, familyName?: string, ownerAddress: string }[],
@@ -95,7 +96,14 @@ export default (Vue as VueConstructor<VVue>).extend({
 
     this.decodedToken = decodedToken;
 
-    verifyAuthRequestAndLoadManifest(authRequest).then((manifest: { name: string, icons: { src: string }[] }) => {
+    verifyAuthRequestAndLoadManifest(authRequest).then((manifest: {
+      name: string,
+      description?: string,
+      icons: {
+        src: string
+        sizes: string,
+        type: string
+      }[] }) => {
 
       this.manifest = Object.assign({}, manifest);
 
@@ -104,7 +112,14 @@ export default (Vue as VueConstructor<VVue>).extend({
       const appDomain = decodedToken.payload.domain_name;
       this.app.url = appDomain;
       this.app.name = manifest.name;
-      this.app.icon = (manifest && manifest.icons && manifest.icons[0] && manifest.icons[0].src) || '';
+      this.app.description = manifest.description || '';
+      let icon: { src: string };
+      if(manifest.icons) {
+        icon = manifest.icons.find(a => a.sizes === '128x128');
+        if(!icon) icon = manifest.icons.find(a => a.sizes === '192x192');
+        if(!icon) icon = manifest.icons[0];
+      }
+      this.app.icon = icon ? icon.src : '';
       for(const scope of decodedToken.payload.scopes)
         this.app.scopes[scope] = true;
 
@@ -239,7 +254,12 @@ export default (Vue as VueConstructor<VVue>).extend({
 
         // (DNE): commit('removeCoreSessionToken', appDomain);
 
-        commit('apps/addRecent', { name: this.app.name, imageUrl: this.app.icon, website: this.app.url } as AppEntry)
+        commit('apps/addRecent', {
+          name: this.app.name,
+          imageUrl: this.app.icon,
+          description: this.app.description || '',
+          website: this.app.url
+        } as AppEntry);
 
         if(window.history.length > 1) {
           redirectUserToApp(this.authRequest, authResponse);

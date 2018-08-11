@@ -6,15 +6,16 @@ import Buefy from 'buefy';
 import { initialStore } from 'common/vuex/initial-store';
 
 import AppComponent from './app/app';
+import AppletComponent from './components/applet/applet';
 import BsLoadingComponent from 'common/components/bs-loading/bs-loading';
+import { initializeRemoteChild } from 'common/vuex/remote-interface';
+import { makeCenterStyle, makeInitializerComponent } from 'common/render-util';
 
 import router from './router';
 
 import '@mdi/font/css/materialdesignicons.css';
 import 'buefy/lib/buefy.css'
 import './styles.scss';
-import { initializeRemoteChild } from 'common/vuex/remote-interface';
-import { makeCenterStyle, makeInitializerComponent } from 'common/render-util';
 
 console.log('Environment:', process.env.NODE_ENV);
 
@@ -34,7 +35,7 @@ const v = new Vue({
       loggedIn: 'account/isLoggedIn'
     }),
   },
-  components: { AppComponent, BsLoadingComponent },
+  components: { AppComponent, BsLoadingComponent, AppletComponent },
   render(h) {
     if(this.loaded) {
       if(this.loggedIn)

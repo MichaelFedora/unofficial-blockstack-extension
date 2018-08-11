@@ -1,6 +1,6 @@
 <template>
 <div id='app'>
-  <nav class='navbar' style='width: 100%' role='navigation' aria-label='main navigation'>
+  <nav class='navbar' role='navigation' aria-label='main navigation'>
     <div class='navbar-brand'>
       <router-link class='navbar-item hover-underline-child' to='/'>
         <img src='/assets/images/icon-48.png' alt='Blockstack'>
@@ -123,6 +123,15 @@
   min-height: 100vh;
   align-items: center;
 
+  > nav {
+    width: 100%;
+    height: 60px;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+    > * {
+      height: 100%;
+    }
+  }
+
   div.navbar-brand > a.navbar-item:first-child {
     display: flex;
     align-items: center;
@@ -214,7 +223,7 @@
     flex-grow: 1;
     align-self: stretch;
     margin: 16px;
-    margin-top: 8px;
+    //margin-top: 8px;
     > * {
       position: absolute;
       top: 0;

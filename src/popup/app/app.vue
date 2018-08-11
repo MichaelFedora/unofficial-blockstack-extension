@@ -101,26 +101,39 @@
       </b-field>
     </div>
     <div style='width: 100%' v-if='!search'>
+      <template v-if='recentApps.length > 0'>
       <h5 class='title is-6' style='margin-bottom: 1rem' v-show='recentApps.length > 0'>Recent Apps</h5>
       <div class='results-apps'>
-        <a v-for='app of recentApps' :key='app.name' @click='gotoApp(app)'>
-          <img :src='appIcons[app.name]' @error='incrementError(app)'>
-          <span>{{app.displayName || app.name}}</span>
+        <a v-for='app of recentApps' :key='app.name' :href='app.website'>
+          <img :src='app.imageUrl'>
+          <span>{{app.name}}</span>
         </a>
       </div>
-      <h5 class='title is-6' style='margin: 1rem 0' v-show='recommendedApps.length > 0'>Recommended Apps</h5>
+      </template>
+      <template v-if='pinnedApps.length > 0'>
+      <h5 class='title is-6' style='margin: 1rem 0'>Pinned Apps</h5>
       <div class='results-apps'>
-        <a v-for='app of recommendedApps' :key='app.name' @click='gotoApp(app)'>
-          <img :src='appIcons[app.name]' @error='incrementError(app)'>
-          <span>{{app.displayName || app.name}}</span>
+        <a v-for='app of pinnedApps' :key='app.name' :href='app.website'>
+          <img :src='app.imageUrl'>
+          <span>{{app.name}}</span>
         </a>
       </div>
+      </template>
+      <template v-else-if='recommendedApps.length > 0'>
+      <h5 class='title is-6' style='margin: 1rem 0'>Recommended Apps</h5>
+      <div class='results-apps'>
+        <a v-for='app of recommendedApps' :key='app.name' :href='app.website'>
+          <img :src='app.imageUrl'>
+          <span>{{app.name}}</span>
+        </a>
+      </div>
+      </template>
     </div>
     <div v-else style='width: 100%'>
       <div class='results-apps'>
-        <a v-for='app of appResults' :key='app.name' @click='gotoApp(app)'>
-          <img :src='appIcons[app.name]' @error='incrementError(app)'>
-          <span>{{app.displayName || app.name}}</span>
+        <a v-for='app of appResults' :key='app.name' :href='app.website'>
+          <img :src='app.imageUrl'>
+          <span>{{app.name}}</span>
         </a>
       </div>
       <span v-show='search.length > 0 && appResults.length === 0'>Nothing found!</span>
@@ -273,6 +286,8 @@
         height: 24px;
         width: 24px;
         margin-right: 0.5rem;
+        border-radius: 22.5%;
+        filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.33));
       }
     }
   }
