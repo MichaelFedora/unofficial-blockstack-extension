@@ -1,9 +1,6 @@
 # TODO - v2
 
 - Finish Main View
-  - Add Login Component
-  - Add Search Apps Page
-    - Seperate into Pinned app results vs all "other" app results
   - Add Profile Editor/Page
   - Adjust Wallet Page (Look & Feel)
   - Add Settings Page

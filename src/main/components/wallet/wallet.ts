@@ -8,11 +8,11 @@ import { StateType } from 'common/vuex/stores/types/state';
 import { FieldFlags } from 'vee-validate';
 
 export default (Vue as VVue).component('bs-main-wallet', {
+  props: { action: { required: true, type: String } },
   data() {
     return {
       btcPrice: 1000,
       refreshing: false,
-      action: this.$route.params.action,
 
       recipient: '',
       amount: 0,
@@ -29,9 +29,8 @@ export default (Vue as VVue).component('bs-main-wallet', {
   },
   watch: {
     $route(n, o) {
-      if(this.$route.params.action !== 'receive' && this.$route.params.action !== 'send')
+      if(this.action !== 'receive' && this.action !== 'send')
         this.$router.push({ params: { action: 'receive' }});
-      else this.action = this.$route.params.action;
     },
     action(n, o) {
       if(n !== o) {

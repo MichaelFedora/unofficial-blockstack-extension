@@ -69,8 +69,7 @@
         </a>
       </div>
       <span v-show='search.length > 0 && appResults.length === 0'>Nothing found!</span>
-      <!-- a v-show='resultCount > appResults.length' class='sudo-link' @click='gotoMain("search?q="+search)'>More...</a -->
-      <span v-show='resultCount > appResults.length'>... and {{resultCount - appResults.length}} more.</span>
+      <a v-show='resultCount > appResults.length' class='sudo-link' @click='gotoMain("search?q="+search)'>... and {{resultCount - appResults.length}} more.</a>
     </div>
     <span class='has-text-danger' v-if='error'>{{error}}</span>
   </div>

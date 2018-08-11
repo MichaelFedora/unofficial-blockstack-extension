@@ -20,7 +20,7 @@ export default (Vue as VVue).component('bs-main-home', {
       const visible = [].concat(this.$store.state.apps.recent, this.$store.state.apps.pinned);
       return this.$store.state.apps.apps
             .filter(a => RecommendedAppNames.find(b => b === a.name))
-            .filter(a => !visible.find(b => b.name === a.name || b.websites === a.website));
+            .filter(a => !visible.find(b => b.name === a.name || b.website === a.website));
     },
     otherApps(): AppEntry[] {
       const visible = [].concat(this.$store.state.apps.recent, this.$store.state.apps.pinned, this.recommendedApps);

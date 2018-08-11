@@ -14,10 +14,10 @@ const router = new VueRouter({
   mode: 'hash',
   routes: [
     { path: '/', component: HomeComponent },
-    { path: '/search', component: SearchComponent },
+    { path: '/search', component: SearchComponent, props: (route) => ({ search: route.query.q }) },
     { path: '/profile', component: ProfileComponent },
     { path: '/wallet', redirect: '/wallet/recieve' },
-    { path: '/wallet/:action', component: WalletComponent },
+    { path: '/wallet/:action', component: WalletComponent, props: true },
     { path: '/settings/api', component: ApiSettingsComponent },
     { path: '*', component: NotFoundComponent }
   ]

@@ -16,11 +16,8 @@ import ProfileComponent from '../components/profile/profile';
 export default (Vue as VVue).extend({
   data() {
     return {
-      search: this.$route.query['q'] || '',
+      search: '',
       showMenu: false,
-
-      appResults: [],
-      resultCount: 0,
 
       appIcons: { } as { [key: string]: string },
       erroredIcons: { } as { [key: string]: number },
@@ -76,39 +73,13 @@ export default (Vue as VVue).extend({
       return absolute ? this.$route.path === url :
           this.$route.path.substr(0, url.length) === url;
     },
-    incrementError(app: AppEntry) {
-      if(!this.erroredIcons[app.name])
-        this.erroredIcons[app.name] = 1;
-      else
-        this.erroredIcons[app.name]++;
-
-      if(app.imageUrl.startsWith('http') && this.erroredIcons[app.name] === 1) {
-        this.appIcons[app.name] = app.imageUrl.replace(
-            'http://blockstack-browser-server.appartisan.com/static/images/',
-            'https://browser.blockstack.org/images/');
-      } else this.appIcons[app.name] = 'assets/images/blockstack-rounded-48x48.png';
-    },
     updateSearch(n?: string) { },
     _updateSearch(n?: string) {
       if(!n) {
-        this.appResults.splice(0, this.appResults.length);
-        this.resultCount = 0;
         this.$router.push({ path: '/', query: { } });
         return;
       }
       this.$router.push({ path: '/search', query: { q: n }});
-      n = n.toLocaleLowerCase();
-      const res = this.$store.state.apps.apps
-        .map((app: AppEntry) => [app, app.name.toLocaleLowerCase().indexOf(n)] as [AppEntry, number])
-        .filter(([app, score]) => score >= 0)
-        .sort((a, b) => (a[1] - b[1]) || a[0].name.localeCompare(b[0].name))
-        .map(a => a[0]);
-      this.resultCount = res.length;
-      if(res.length > 5) res.length = 5;
-      this.appResults.splice(0, this.appResults.length, ...res);
-      for(const app of this.appResults)
-        if(!this.appIcons[app.name])
-          Vue.set(this.appIcons, app.name, app.appIcon.small);
     },
     openProfile() {
       this.showMenu = false;
