@@ -131,11 +131,9 @@ export const accountModule: Module<AccountStateType, StateType> = {
       commit('addIdentity', { keyPair: derivedIdentityKeyPair });
       commit('identity/create', { ownerAddress: derivedIdentityKeyPair.address }, { root: true })
     },
-    async removeIdentity({ commit, state }, payload: { index: number }) {
-      if(payload.index >= state.identityAccount.addresses.length || payload.index <= 0)
-        throw new Error('Index is out of range: Must be valid and not 0!');
-      commit('removeIdentity', payload);
-      commit('identity/remove', payload, { root: true });
+    async removeIdentity({ commit }, payload: { index: number }) {
+      commit('removeIdentity', { index: payload.index }),
+      commit('identity/remove', { index: payload.index }, { root: true })
     },
     async changePassword({ state, commit }, { newpass, oldpass }: { newpass: string, oldpass: string }) {
       const phrase = await decrypt(state.encryptedBackupPhrase, oldpass);
