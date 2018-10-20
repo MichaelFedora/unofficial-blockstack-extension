@@ -1,9 +1,9 @@
-const DEFAULT_PROFILE: Profile = {
+export const DEFAULT_PROFILE: Profile = {
   '@type': 'Person',
   '@context': 'http://schema.org'
 }
 
-interface Profile {
+export interface Profile {
   '@type': 'Person';
   '@context': 'http://schema.org';
   name?: string;

@@ -9,7 +9,7 @@ import {
   wrapProfileToken,
   resolveZoneFileToProfile
 } from 'blockstack';
-import { IdentityStateType, LocalIdentity } from './types/identity.state';
+import { IdentityStateType, LocalIdentity, DEFAULT_PROFILE, Profile } from './types/identity.state';
 import { StateType } from './types/state';
 import axios from 'axios';
 import { parseZoneFile } from 'zone-file';
@@ -49,10 +49,15 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         console.error(`Can't update local identity at index ${index}; it doesn't exist (or doesn't have an ownerAddress)!`);
         return;
       }
+      let profile;
+      if(payload.profile)
+        profile = Object.assign({}, DEFAULT_PROFILE, state.localIdentities[index].profile, payload.profile);
+
       Vue.set(state.localIdentities, index, Object.assign(
-        {},
-        state.localIdentities[index],
-        payload));
+          {},
+          state.localIdentities[index],
+          payload,
+          profile ? { profile } : undefined));
     },
     updateApp(state, { index, domain, payload }: { index: number, domain: string, payload: any }) {
       if(!(state.localIdentities[index] && state.localIdentities[index].ownerAddress)) {
@@ -79,15 +84,52 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     addProfileImage(state, { index, payload }: { index?: number, payload: any }) {
       index = index || state.default;
       if(!state.localIdentities[index] || !state.localIdentities[index].profile) {
-        console.error('No profile for index ' + index + ' to upload image to.');
+        console.error('No profile on index ' + index + ' to upload image to.');
         return;
       }
 
-      state.localIdentities[index].profile.image.push(Object.assign({
-        '@type': 'ImageObject',
-        name: '',
-        contentUrl: ''
-      }, payload));
+      if(!state.localIdentities[index].profile.image) {
+        Vue.set(state.localIdentities[index].profile, 'image', [
+          Object.assign({
+            '@type': 'ImageObject',
+            name: '',
+            contentUrl: ''
+          },
+          payload) ]);
+      } else {
+
+        // sanitize
+
+        if(state.localIdentities[index].profile.image.length > 1) {
+          const newImages = state.localIdentities[index].profile.image.reduce((acc, v) => {
+            if(!acc.find(a => a.name === v.name))
+              acc.push(v);
+            return acc;
+          }, []);
+          if(newImages.length !== state.localIdentities[index].profile.image.length)
+            Vue.set(state.localIdentities[index].profile, 'image', newImages);
+        }
+
+        // insert
+
+        const i = state.localIdentities[index].profile.image.findIndex(a => a.name === payload.name);
+        if(i >= 0) {
+          Vue.set(state.localIdentities[index].profile.image, i, Object.assign({
+              '@type': 'ImageObject',
+              name: '',
+              contentUrl: ''
+            },
+            state.localIdentities[index].profile.image[i],
+            payload));
+        } else {
+          state.localIdentities[index].profile.image.push(Object.assign({
+              '@type': 'ImageObject',
+              name: '',
+              contentUrl: ''
+            },
+            payload));
+        }
+      }
     }
   },
   getters: {
@@ -286,9 +328,9 @@ export const identityModule: Module<IdentityStateType, StateType> = {
           .catch(e => Promise.reject(new Error(`Issue writing to ${url}: ` + e)));
     },
     async uploadProfileImage({ commit, dispatch, state, rootState },
-      { index, photoFile, photoName }: { index?: number, photoFile: string, photoName?: string}) {
+      { index, file, name }: { index?: number, file: string, name?: string}) {
       index = index || state.default;
-      photoName = photoName || 'avatar-0';
+      name = name || 'avatar-0';
       const keypair = rootState.account.identityAccount.keypairs[index];
       if(!keypair) throw new Error('No keypair in the index ' + index + '!');
       if(!state.localIdentities[index]) throw new Error('No local identity in the index ' + index + '!');
@@ -302,11 +344,11 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       else
         throw new Error(`Can't determine profile-photo storage location (no profile.json in upload location): ${profileUploadLoc}`);
 
-      const url = profileUploadLoc + '/' + photoName;
-      return tryUpload(url, photoFile, identityHubConfig)
-        .catch(() => tryUpload(url, photoFile, rootState.settings.api.gaiaHubConfig))
+      const url = profileUploadLoc + '/' + name;
+      return tryUpload(url, file, identityHubConfig)
+        .catch(() => tryUpload(url, file, rootState.settings.api.gaiaHubConfig))
         .then(() => {
-          commit('addProfileImage', { index, payload: { name: photoName.replace(/-\d+$/, ''), contentUrl: url }});
+          commit('addProfileImage', { index, payload: { name: name.replace(/-\d+$/, ''), contentUrl: url }});
           return dispatch('upload', { index });
         }, e => Promise.reject(new Error(`Issue writing to ${url}: ` + e)));
     }
