@@ -75,8 +75,13 @@ div#bs-popup-profile {
     > figure:first-child {
       height: 100px;
       width: 100px;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      border-radius: 50%;
+      overflow: hidden;
       > img {
-        border-radius: 50%;
+        align-self: center;
       }
     }
 
