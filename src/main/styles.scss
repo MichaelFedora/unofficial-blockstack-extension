@@ -41,3 +41,26 @@ a.hover-underline-child:hover {
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0
 }
+
+button.fab {
+
+  height: 2.75rem;
+  width: 2.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.33);
+
+  &.is-tr {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  &.is-br {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
