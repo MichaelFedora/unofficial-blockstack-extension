@@ -15,7 +15,7 @@ import { makeCenterStyle, makeInitializerComponent } from 'common/render-util';
 import router from './router';
 
 import '@mdi/font/css/materialdesignicons.css';
-import 'buefy/lib/buefy.css'
+import 'common/buefy.scss'
 import './styles.scss';
 
 console.log('Environment:', process.env.NODE_ENV);

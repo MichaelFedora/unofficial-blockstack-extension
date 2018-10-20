@@ -45,7 +45,7 @@ export const appsModule: Module<AppsStateType, StateType> = {
       const newRecent = state.recent.slice().filter(a => a.name !== app.name && a.website !== app.website);
       const storeApp = state.apps.find(a => a.name === app.name || a.website === app.website);
 
-      newRecent.unshift(storeApp ? app : storeApp);
+      newRecent.unshift(storeApp || app);
       state.recent.splice(0, state.recent.length, ...newRecent.slice(0, 5));
 
       const i = state.pinned.findIndex(a => a.name === app.name || a.website === app.website);

@@ -9,7 +9,7 @@ import BsLoadingComponent from 'common/components/bs-loading/bs-loading';
 import BsLoginComponent from 'common/components/bs-login/bs-login';
 
 import '@mdi/font/css/materialdesignicons.css';
-import 'buefy/lib/buefy.css';
+import 'common/buefy.scss';
 import './styles.scss';
 import { initializeRemoteChild } from 'common/vuex/remote-interface';
 import { makeInitializerComponent } from 'common/render-util';
