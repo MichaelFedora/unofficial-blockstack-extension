@@ -5,33 +5,24 @@ import { StateType } from 'common/vuex/stores/types/state';
 import { LocalIdentity } from 'common/vuex/stores/types/identity.state';
 import { dispatch } from 'common/vuex/remote-interface';
 
-
 export default (Vue as VVue).component('bs-popup-profile', {
   props: {
     toggle: { required: true, type: Boolean }
   },
   data() { return { } },
   computed: {
-    profileName: function() {
-      const identity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
-      return this.getProfileName(identity);
-    },
-    idString: function() {
-      const identity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
-      return identity ? `ID-${identity.ownerAddress}` : '';
-    },
-    profileImg: function() {
-      const defaultIdentity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
-      return this.getProfileImage(defaultIdentity);
-    },
-    bio: function() {
-      const defaultIdentity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
-      return this.getBio(defaultIdentity);
+    defaultId: function() { return this.localIdentities[this.defaultIndex]; },
+    profileName: function() { return this.getProfileName(this.defaultId); },
+    idString: function() { return this.defaultId ? `ID-${this.defaultId.ownerAddress}` : ''; },
+    profileImg: function() { return this.getProfileImage(this.defaultId); },
+    bio: function() { return this.getBio(this.defaultId); },
+    otherIdentities: function() {
+      return this.localIdentities.filter((a, i) => i !== this.defaultIndex);
     },
     ...mapState({
       localIdentities: (state: StateType) => state.identity.localIdentities,
       defaultIndex: (state: StateType) => state.identity.default
-    })
+    }) as { localIdentities: () => LocalIdentity[], defaultIndex: () => number }
   },
   methods: {
     getBio(identity: LocalIdentity) {

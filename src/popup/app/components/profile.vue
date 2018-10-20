@@ -14,22 +14,22 @@
       <span>{{idString}}</span>
       <p v-if='bio'>{{bio}}</p>
     </div>
-    <template v-if='localIdentities.length > 1'>
+    <template v-if='otherIdentities.length > 0'>
     <hr style='width:100%'>
     <p>
       <span>Also signed in as</span>
-      <template v-if='localIdentities.length === 2'>
-        <span><span class='b' :title='"ID-" + localIdentities[1].ownerAddress'>{{getProfileName(localIdentities[1]) || '{anon}'}}</span>.</span>
+      <template v-if='otherIdentities.length === 1'>
+        <span><span class='b' :title='"ID-" + otherIdentities[0].ownerAddress'>{{getProfileName(otherIdentities[0]) || '{anon}'}}</span>.</span>
       </template>
-      <template v-else-if='localIdentities.length === 3'>
-        <span class='b' :title='"ID-" + localIdentities[1].ownerAddress'>{{getProfileName(localIdentities[1]) || '{anon}'}}</span>
+      <template v-else-if='otherIdentities.length === 2'>
+        <span class='b' :title='"ID-" + otherIdentities[0].ownerAddress'>{{getProfileName(otherIdentities[0]) || '{anon}'}}</span>
         <span>and</span>
-        <span><span class='b' :title='"ID-" + localIdentities[2].ownerAddress'>{{getProfileName(localIdentities[2]) || '{anon}'}}</span>.</span>
+        <span><span class='b' :title='"ID-" + otherIdentities[1].ownerAddress'>{{getProfileName(otherIdentities[1]) || '{anon}'}}</span>.</span>
       </template>
       <template v-else>
-        <span><span class='b' :title='"ID-" + localIdentities[1].ownerAddress'>{{getProfileName(localIdentities[1]) || '{anon}'}}</span>,</span>
-        <span v-for='(altId, index) of localIdentities' v-if='index > 1 && index < localIdentities.length - 1' :key='altId.ownerAddress'><span class='b' :title='"ID-" + altId.ownerAddress'>{{getProfileName(altId) || '{anon}'}}</span>,</span>
-        <span><span class='b' :title='"ID-" + localIdentities[localIdentities.length - 1].ownerAddress'>{{getProfileName(localIdentities[localIdentities.length - 1]) || '{anon}'}}</span>.</span>
+        <span><span class='b' :title='"ID-" + otherIdentities[0].ownerAddress'>{{getProfileName(otherIdentities[0]) || '{anon}'}}</span>,</span>
+        <span v-for='(altId, index) of otherIdentities' v-if='index > 0 && index < otherIdentities.length - 1' :key='altId.ownerAddress'><span class='b' :title='"ID-" + altId.ownerAddress'>{{getProfileName(altId) || '{anon}'}}</span>,</span>
+        <span><span class='b' :title='"ID-" + otherIdentities[otherIdentities.length - 1].ownerAddress'>{{getProfileName(otherIdentities[otherIdentities.length - 1]) || '{anon}'}}</span>.</span>
       </template>
     </p>
     </template>
