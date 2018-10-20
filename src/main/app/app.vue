@@ -22,7 +22,7 @@
       </div>
 
       <div class='navbar-end'>
-        <a class='navbar-item is-hidden-desktop profile-container' style='border-bottom: 2px solid rgba(0,0,0,0.05)'>
+        <a class='navbar-item is-hidden-desktop profile-container' style='border-bottom: 2px solid rgba(0,0,0,0.05)' @click='openProfile()'>
           <figure v-if='profileImg'><img :src='profileImg'></figure>
           <div v-else>
             <span>{{(profileName || '?')[0] }}</span>
