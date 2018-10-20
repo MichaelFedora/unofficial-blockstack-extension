@@ -10,8 +10,6 @@ import { VVue } from 'common/vvue';
 import { decrypt } from 'common/util';
 
 import ChangePasswordComponent from './components/change-password';
-import ManageIdentitiesComponent from './components/manage-identities';
-import ProfileComponent from '../components/profile/profile';
 
 export default (Vue as VVue).extend({
   data() {
@@ -83,19 +81,7 @@ export default (Vue as VVue).extend({
     },
     openProfile() {
       this.showMenu = false;
-      this.$modal.open({
-        parent: this,
-        component: ProfileComponent,
-        hasModalCard: true
-      });
-    },
-    switchIdentity() {
-      this.showMenu = false;
-      this.$modal.open({
-        parent: this,
-        component: ManageIdentitiesComponent,
-        hasModalCard: true
-      });
+      this.$router.push({ path: '/profile' });
     },
     changePassword() {
       this.showMenu = false;

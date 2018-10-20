@@ -16,6 +16,7 @@ const router = new VueRouter({
     { path: '/', component: HomeComponent },
     { path: '/search', component: SearchComponent, props: (route) => ({ search: route.query.q }) },
     { path: '/profile', component: ProfileComponent },
+    { path: '/profile/:index', component: ProfileComponent, props: true },
     { path: '/wallet', component: WalletComponent },
     { path: '/settings/api', component: ApiSettingsComponent },
     { path: '*', component: NotFoundComponent }

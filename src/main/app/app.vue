@@ -22,7 +22,7 @@
       </div>
 
       <div class='navbar-end'>
-        <a class='navbar-item is-hidden-desktop profile-container' style='border-bottom: 2px solid rgba(0,0,0,0.1)'>
+        <a class='navbar-item is-hidden-desktop profile-container' style='border-bottom: 2px solid rgba(0,0,0,0.05)'>
           <figure v-if='profileImg'><img :src='profileImg'></figure>
           <div v-else>
             <span>{{(profileName || '?')[0] }}</span>
@@ -34,11 +34,6 @@
           <div>
             <b-icon icon='chevron-right'></b-icon>
           </div>
-        </a>
-
-        <a class='navbar-item flex-item is-hidden-desktop' title='Switch Identity' @click='switchIdentity()'>
-          <b-icon icon='account-switch'></b-icon>
-          <span style='font-weight:600'>&nbsp;Switch Identity</span>
         </a>
 
         <router-link to='/' :class='{ "is-active": active("/", true) || active("/search") }'
@@ -61,22 +56,19 @@
             </div>
           </a>
 
-          <b-dropdown-item custom has-link>
-            <a class='profile-container' @click='viewProfile()'>
-              <figure v-if='profileImg'><img :src='profileImg'></figure>
-              <div v-else>
-                <span>{{(profileName || '?')[0] }}</span>
-              </div>
-              <div>
-                <span>{{profileName}}</span>
-                <span>ID-{{defaultIdentity.ownerAddress}}</span>
-              </div>
-              <div>
-                <b-icon icon='chevron-right'></b-icon>
-              </div>
-            </a>
+          <b-dropdown-item class='profile-container' @click='openProfile()'>
+            <figure v-if='profileImg'><img :src='profileImg'></figure>
+            <div v-else>
+              <span>{{(profileName || '?')[0] }}</span>
+            </div>
+            <div>
+              <span>{{profileName}}</span>
+              <span>ID-{{defaultIdentity.ownerAddress}}</span>
+            </div>
+            <div>
+              <b-icon icon='chevron-right'></b-icon>
+            </div>
           </b-dropdown-item>
-          <b-dropdown-item @click='switchIdentity()'>Switch Identity</b-dropdown-item>
           <b-dropdown-item @click='showSettings()'>Settings</b-dropdown-item>
           <b-dropdown-item @click='logout()'>Logout</b-dropdown-item>
         </b-dropdown>
@@ -125,10 +117,24 @@
 
   > nav {
     width: 100%;
-    height: 60px;
+    height: 3.25rem;
     border-bottom: 2px solid rgba(0,0,0,0.05);
     > * {
       height: 100%;
+    }
+  }
+
+  div.navbar-menu {
+    box-shadow: none;
+
+    > div {
+      background-color: inherit;
+    }
+
+    &.is-active > div.navbar-end {
+      @media(max-width: 1087px) {
+        border-bottom: 2px solid rgba(0,0,0,0.05)
+      }
     }
   }
 
@@ -156,8 +162,13 @@
     > figure:first-child{
       height: 24px;
       width: 24px;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      border-radius: 50%;
+      overflow: hidden;
       > img {
-        border-radius: 50%;
+        align-self: center;
       }
     }
 
@@ -222,7 +233,8 @@
     position: relative;
     flex-grow: 1;
     align-self: stretch;
-    margin: 16px;
+    overflow: auto;
+    // margin: 16px;
     //margin-top: 8px;
     > * {
       position: absolute;
