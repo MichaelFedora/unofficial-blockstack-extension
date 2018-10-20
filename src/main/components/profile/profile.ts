@@ -6,7 +6,7 @@ import { LocalIdentity } from 'common/vuex/stores/types/identity.state';
 import { commit, dispatch } from 'common/vuex/remote-interface';
 
 export default (Vue as VVue).component('bs-main-profile', {
-  props: { index: { required: false, type: Number, default: -1 } },
+  props: { index: { required: false, default: -1 } },
   data() {
     return {
       editing: false,
@@ -22,7 +22,7 @@ export default (Vue as VVue).component('bs-main-profile', {
       return this.$store.state.identity.localIdentities[this.$store.state.identity.default];
     },
     selectedId: function() {
-      return this.$store.state.identity.localIdentities[this.index] || this.defaultId; // *shrug*
+      return this.$store.state.identity.localIdentities[this.current] || this.defaultId; // *shrug*
     },
     defaultSelected: function() {
       return this.selectedId.ownerAddress === this.defaultId.ownerAddress
@@ -32,8 +32,9 @@ export default (Vue as VVue).component('bs-main-profile', {
       identities: (state: StateType) => state.identity.localIdentities
     })  as { defaultIdIndex: () => number, identities: () => LocalIdentity[] },
     current: function() {
-      if(this.index >= 0 && this.index < this.$store.state.identity.localIdentities.length)
-        return this.index;
+      const index = Number(this.index);
+      if(index >= 0 && index < this.$store.state.identity.localIdentities.length)
+        return index;
       else return this.$store.state.identity.default;
     }
   },
