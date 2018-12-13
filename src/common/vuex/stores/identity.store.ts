@@ -185,7 +185,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         ownerAddress = identity.ownerAddress;
       else
         ownerAddress = rootState.account.identityAccount.addresses[index];
-      return rootState.settings.api.gaiaUrlBase + '/' + ownerAddress + '/profile.json';
+      return rootState.settings.api.gaiaHubConfig.url_prefix + '/' + ownerAddress + '/profile.json';
     },
     async getProfileUploadLocation({ state, getters, rootState }, index?: number) {
       index = index || state.default;
@@ -233,7 +233,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     },
     async downloadProfiles({ state, dispatch, rootState }, { index }: { index?: number }) {
       index = index || state.default;
-      const gaiaUrlBase = rootState.settings.api.gaiaUrlBase;
+      const gaiaUrlBase = rootState.settings.api.gaiaHubConfig.url_prefix;
       const firstAddress = rootState.account.identityAccount.keypairs[0].address;
       const ownerAddress = rootState.account.identityAccount.keypairs[index].address;
 
@@ -270,7 +270,9 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       }
       if(!state.localIdentities[index])
         commit('create', { ownerAddress: addr });
-      const url = rootState.settings.api.bitcoinAddressLookupUrl.replace('{address}', addr);
+      const url = rootState.settings.api.bitcoinAddressLookupUrl
+          .replace('{coreApi}', rootState.settings.api.coreApi)
+          .replace('{address}', addr);
       return axios.get(url).then(res => {
         if(res.data.names.length === 0) {
           console.log('Address ' + addr + ' has no names, checking default locations.');
@@ -286,7 +288,9 @@ export const identityModule: Module<IdentityStateType, StateType> = {
           });
 
           /** Todo?: Make it so it falls-back to other usernames */
-          const lookupUrl = rootState.settings.api.nameLookupUrl.replace('{name}', res.data.names[0]);
+          const lookupUrl = rootState.settings.api.nameLookupUrl
+              .replace('{coreApi}', rootState.settings.api.coreApi)
+              .replace('{name}', res.data.names[0]);
           return axios.get(lookupUrl).then(lookupRes => {
             if(!lookupRes.data || !lookupRes.data.zonefile || !lookupRes.data.address) {
               console.warn(`Malformed return from lookup url: (${lookupRes.status}) ${lookupRes.statusText}!`);

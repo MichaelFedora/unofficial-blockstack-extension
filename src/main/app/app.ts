@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import { AppEntry } from 'common/data/app-entry';
 import _ from 'lodash';
 import { Route } from 'vue-router';
 import { mapState } from 'vuex';
@@ -46,9 +45,9 @@ export default (Vue as VVue).extend({
   watch: {
     $route(n: Route, o) {
       if(!o && n.query['q'] !== this.search)
-        this.search = n.query['q']
+        this.search = n.query['q'] as string; // :/
       else if(n.query['q'] !== o.query['q'] && (n.query['q'] || o.query['q']) && n.query['q'] !== this.search)
-        this.search = n.query['q']
+        this.search = n.query['q'] as string;
       else if(n.path !== '/search' && this.search)
         this.search = '';
 
@@ -82,6 +81,10 @@ export default (Vue as VVue).extend({
     openProfile() {
       this.showMenu = false;
       this.$router.push({ path: '/profile' });
+    },
+    showSettings() {
+      this.showMenu = false;
+      this.$router.push({ path: '/settings' });
     },
     changePassword() {
       this.showMenu = false;

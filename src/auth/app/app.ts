@@ -159,7 +159,9 @@ export default (Vue as VueConstructor<VVue>).extend({
 
       let blockchainId: string | undefined = undefined;
       if(hasUsername) {
-        const lookupUrl = this.$store.state.settings.api.nameLookupUrl.replace('{name}', identity.username);
+        const lookupUrl = this.$store.state.settings.api.nameLookupUrl
+          .replace('{coreApi}', this.$store.state.settings.api.coreApi)
+          .replace('{name}', identity.username);
         let resText: string;
 
         try {
@@ -207,7 +209,7 @@ export default (Vue as VueConstructor<VVue>).extend({
 
       // const gaiaBucketAddress = this.$store.state.account.identityAccount.keypairs[0].address;
       // const identityAddress = identityKeypair.address;
-      // const gaiaUrlBase = this.$store.state.settings.api.gaiaUrlBase || 'https://gaia.blockstack.org/hub';
+      // const gaiaUrlBase = this.$store.state.settings.api.gaiaHubConfig.url_prefix;
 
       if(!profileUrlPromise)
         profileUrlPromise = dispatch('identity/downloadProfiles', { index: this.currentIdentityIndex }).then(res => {

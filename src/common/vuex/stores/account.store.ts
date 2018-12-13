@@ -143,8 +143,10 @@ export const accountModule: Module<AccountStateType, StateType> = {
     },
     async refreshBalances({ state, commit, rootState }) {
       const balances: { [key: string]: number } = { };
+      const insightUrl = 'https://utxo.blockstack.org/insight-api/addr/{address}'; // only one that works
+
       for(const addr of state.bitcoinAccount.addresses) {
-        const rootUrl = rootState.settings.api.insightUrl.replace('{address}', addr);
+        const rootUrl = insightUrl.replace('{address}', addr);
         const results = await Promise.all([
           Axios.get(rootUrl + '/balance'),
           Axios.get(rootUrl + '/unconfirmedBalance')

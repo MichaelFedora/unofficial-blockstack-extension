@@ -1,12 +1,11 @@
 import { StoreOptions } from 'vuex';
-import { makeDefaultApiClone, ApiSettingsType } from '../settings/default';
+import { makeDefaultApiClone, ApiSettingsType, BLOCKSTACK_INC } from '../settings/default';
 import { accountModule } from './stores/account.store';
 import { appsModule } from './stores/apps.store';
 import { registrationModule } from './stores/registration.store';
-import { connectToGaiaHub } from 'blockstack';
+import { connectToGaiaHub, GaiaHubConfig } from 'blockstack';
 import { StateType } from './stores/types/state';
 import { identityModule } from './stores/identity.store';
-import { BLOCKSTACK_INC } from '../util';
 
 function makeState(): StateType {
   return {
@@ -47,28 +46,25 @@ export const initialStore: StoreOptions<StateType> = {
         dispatch('registration/reset'),
         dispatch('identity/reset'),
         dispatch('apps/reset', { justUserdata: true }),
-        dispatch('logoutApi')
+        dispatch('resetApi')
       ]);
     },
-    logoutApi({ commit }) {
+    resetApi({ commit }) {
       const def = makeDefaultApiClone();
       commit('updateApi', {
         gaiaHubConfig: def.gaiaHubConfig,
-        hostedDataLocation: def.hostedDataLocation,
         storageConnected: false
       });
     },
     async connectSharedService({ commit, state, getters }) {
       if(!getters['account/isLoggedIn']) throw new Error('Not logged in!');
       if(state.settings.api.storageConnected &&
-        state.settings.api.hostedDataLocation &&
         state.settings.api.gaiaHubConfig) return; // already connected
-      const provider = state.settings.api.gaiaHubUrl;
+      const provider = state.settings.api.gaiaHubOverride || state.settings.api.gaiaHubUrl;
       const signer = state.account.identityAccount.keypairs[0].key; // identityKeypairs
-      return connectToGaiaHub(provider, signer).then(gaiaHubConfig => {
+      return connectToGaiaHub(provider, signer).then((gaiaHubConfig: GaiaHubConfig) => {
         commit('updateApi', {
           gaiaHubConfig,
-          hostedDataLocation: BLOCKSTACK_INC,
           storageConnected: true
         });
       });

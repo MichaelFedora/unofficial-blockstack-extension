@@ -18,7 +18,7 @@ const router = new VueRouter({
     { path: '/profile', component: ProfileComponent },
     { path: '/profile/:index', component: ProfileComponent, props: true },
     { path: '/wallet', component: WalletComponent },
-    { path: '/settings/api', component: ApiSettingsComponent },
+    { path: '/settings', component: ApiSettingsComponent },
     { path: '*', component: NotFoundComponent }
   ]
 });
