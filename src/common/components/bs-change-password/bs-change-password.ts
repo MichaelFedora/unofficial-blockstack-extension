@@ -3,7 +3,7 @@ import { FieldFlags } from 'vee-validate';
 import { VVue } from 'common/vvue';
 import { dispatch } from 'common/vuex/remote-interface';
 
-export default (Vue as VVue).component('bs-main-change-password', {
+export default (Vue as VVue).component('bs-change-password', {
   data() {
     return {
       oldpass: '',

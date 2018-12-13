@@ -69,7 +69,8 @@
               <b-icon icon='chevron-right'></b-icon>
             </div>
           </b-dropdown-item>
-          <b-dropdown-item @click='showSettings()'>Settings</b-dropdown-item>
+          <b-dropdown-item @click='changePassword()'>Change Password</b-dropdown-item>
+          <b-dropdown-item @click='viewPhrase()'>View Backup Phrase</b-dropdown-item>
           <b-dropdown-item @click='logout()'>Logout</b-dropdown-item>
         </b-dropdown>
 
@@ -82,9 +83,6 @@
 
           <b-dropdown-item @click='changePassword()'>Change Password</b-dropdown-item>
           <b-dropdown-item @click='viewPhrase()'>View Backup Phrase</b-dropdown-item>
-          <b-dropdown-item has-link>
-            <router-link to='/settings/api'>Api Settings</router-link>
-          </b-dropdown-item>
         </b-dropdown>
 
         <a class='navbar-item flex-item is-hidden-desktop is-danger' title='Logout' @click='logout()'>

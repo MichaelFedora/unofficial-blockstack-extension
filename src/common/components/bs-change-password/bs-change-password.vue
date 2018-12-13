@@ -34,7 +34,7 @@
   </footer>
 </div>
 </template>
-<script src='./change-password.ts'></script>
+<script src='./bs-change-password.ts'></script>
 <style lang='scss'>
 
 </style>

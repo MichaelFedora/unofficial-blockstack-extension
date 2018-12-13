@@ -1,12 +1,17 @@
 import Vue from 'vue';
 import { VVue } from 'common/vvue';
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { StateType } from 'common/vuex/stores/types/state';
 import { commit, dispatch } from 'common/vuex/remote-interface';
 import Axios, { AxiosResponse } from 'axios';
 import SemVer from 'semver';
+import { decrypt } from 'common/util';
+import ChangePasswordComponent from 'common/components/bs-change-password/bs-change-password';
 
-export default (Vue as VVue).component('bs-main-api-settings', {
+export default (Vue as VVue).component('bs-popup-settings', {
+  props: {
+    toggle: { required: true, type: Boolean }
+  },
   data() {
     return {
       coreApi: '',
@@ -18,6 +23,9 @@ export default (Vue as VVue).component('bs-main-api-settings', {
     applicable: function() {
       return this.coreApi !== this.currentCoreAPI || this.gaiaHubOverride !== this.currentGaiaHubOverride;
     },
+    ...mapGetters({
+      loggedIn: 'account/isLoggedIn'
+    }),
     ...mapState({
       gaiaHubUrl: (state: StateType) => state.settings.api.gaiaHubUrl,
       currentCoreAPI: (state: StateType) => state.settings.api.coreApi,
@@ -90,6 +98,46 @@ export default (Vue as VVue).component('bs-main-api-settings', {
     cancel() {
       this.coreApi = this.currentCoreAPI;
       this.gaiaHubOverride = this.currentGaiaHubOverride;
+    },
+    showRecoveryKey() {
+      this.$dialog.prompt({
+        message: 'Enter your password to view your Backup Phrase',
+        confirmText: 'Authenticate',
+        inputAttrs: {
+          placeholder: 'password',
+          type: 'password'
+        },
+        onConfirm: (value) => {
+          decrypt(this.$store.state.account.encryptedBackupPhrase, value).then(phrase => {
+            this.$dialog.alert({
+              title: 'Backup Phrase',
+              message: `<div class='content'>
+              Anyone with this key can get into your account. Keep it safe.
+              <blockquote style='font-family:monospace'>${phrase}</blockquote>
+              </div>`,
+              confirmText: 'Got it!'
+            })
+          }, e => {
+            console.error('Error decrypting phrase: ' + e);
+            this.$dialog.alert({
+              title: 'Error decrypting phrase',
+              message: `<div class='content'><blockquote>${e}</blockquote>It was probably just a wrong password.</div>`,
+              type: 'is-danger',
+              onConfirm: () => this.showRecoveryKey()
+            });
+          });
+        }
+      }); // prompt
+    },
+    changePassword() {
+      this.$modal.open({
+        parent: this,
+        component: ChangePasswordComponent,
+        hasModalCard: true
+      });
+    },
+    exit() {
+      this.$emit('update:toggle', false);
     }
   }
 });

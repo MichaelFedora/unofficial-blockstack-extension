@@ -5,7 +5,6 @@ import HomeComponent from './components/home/home';
 import SearchComponent from './components/search/search';
 import ProfileComponent from './components/profile/profile';
 import WalletComponent from './components/wallet/wallet';
-import ApiSettingsComponent from './components/api-settings/api-settings';
 import NotFoundComponent from './components/not-found/not-found';
 
 Vue.use(VueRouter);
@@ -18,7 +17,6 @@ const router = new VueRouter({
     { path: '/profile', component: ProfileComponent },
     { path: '/profile/:index', component: ProfileComponent, props: true },
     { path: '/wallet', component: WalletComponent },
-    { path: '/settings', component: ApiSettingsComponent },
     { path: '*', component: NotFoundComponent }
   ]
 });

@@ -8,7 +8,7 @@ import { dispatch } from 'common/vuex/remote-interface';
 import { VVue } from 'common/vvue';
 import { decrypt } from 'common/util';
 
-import ChangePasswordComponent from './components/change-password';
+import ChangePasswordComponent from 'common/components/bs-change-password/bs-change-password';
 
 export default (Vue as VVue).extend({
   data() {
@@ -81,10 +81,6 @@ export default (Vue as VVue).extend({
     openProfile() {
       this.showMenu = false;
       this.$router.push({ path: '/profile' });
-    },
-    showSettings() {
-      this.showMenu = false;
-      this.$router.push({ path: '/settings' });
     },
     changePassword() {
       this.showMenu = false;

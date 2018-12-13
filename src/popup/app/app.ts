@@ -7,6 +7,7 @@ import { dispatch } from 'common/vuex/remote-interface';
 import { VVue } from 'common/vvue';
 
 import ProfileComponent from './components/profile';
+import SettingsComponent from './components/settings';
 import { StateType } from 'common/vuex/stores/types/state';
 import { RecommendedAppNames } from 'common/recommended-apps';
 
@@ -16,7 +17,7 @@ window.onbeforeunload = (ev) => {
 };
 
 export default (Vue as VVue).extend({
-  components: { ProfileComponent },
+  components: { ProfileComponent, SettingsComponent },
   data() {
     return {
       loading: true,
@@ -25,7 +26,8 @@ export default (Vue as VVue).extend({
       appResults: [] as AppEntry[],
       resultCount: 0,
 
-      profileSidebar: false,
+      showProfile: false,
+      showSettings: false,
 
       error: '',
       working: false,

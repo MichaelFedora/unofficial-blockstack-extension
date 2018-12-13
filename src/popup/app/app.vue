@@ -4,15 +4,16 @@
     <bs-loading></bs-loading>
   </div>
 
-  <div class='sidebar' v-if='profileSidebar'>
-    <bs-popup-profile :toggle.sync='profileSidebar' @working='() => {}' @gotoMain='gotoMain($event)'></bs-popup-profile>
+  <div class='sidebar' v-if='showProfile || showSettings'>
+    <bs-popup-profile v-if='showProfile' :toggle.sync='showProfile' @working='() => {}' @gotoMain='gotoMain($event)'></bs-popup-profile>
+    <bs-popup-settings v-if='showSettings' :toggle.sync='showSettings'></bs-popup-settings>
   </div>
 
   <template v-else>
   <div id='header'>
     <figure><img src='/assets/images/icon-48.png'></figure>
-    <h4 class='title is-5' style='position: relative'>Blockstack Extension</h4>
-    <a class='profile-avatar' v-if='loggedIn' @click='profileSidebar = true'>
+    <h4 class='title is-5' style='position: relative'>uBlockstack Ext</h4>
+    <a class='profile-avatar' v-if='loggedIn' @click='showProfile = true'>
       <figure v-if='profileImg'><img :src='profileImg'></figure>
       <div v-else>
         <span>{{(profileName || '?')[0] }}</span>
@@ -20,6 +21,9 @@
     </a>
     <a class='button is-inverted is-primary' @click='gotoMain()'>
       <b-icon icon='launch'></b-icon>
+    </a>
+    <a class='button is-inverted is-primary' @click='showSettings = true'>
+      <b-icon icon='settings'></b-icon>
     </a>
   </div>
 
