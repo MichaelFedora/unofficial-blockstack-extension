@@ -39,7 +39,6 @@ export default (Vue as VVue).component('bs-login', {
     },
   },
   mounted() {
-    console.log('mounted login');
     if(!this.$store.getters['account/isLoggedIn'])
       this.$emit('update:done', false);
     else

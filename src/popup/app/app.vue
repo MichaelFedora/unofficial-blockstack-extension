@@ -13,14 +13,14 @@
   <div id='header'>
     <figure><img src='/assets/images/icon-48.png'></figure>
     <h4 class='title is-5' style='position: relative'>uBlockstack</h4>
+    <a class='button is-inverted is-primary' @click='gotoMain()'>
+      <b-icon icon='launch'></b-icon>
+    </a>
     <a class='profile-avatar' v-if='loggedIn' @click='showProfile = true'>
       <figure v-if='profileImg'><img :src='profileImg'></figure>
       <div v-else>
         <span>{{(profileName || '?')[0] }}</span>
       </div>
-    </a>
-    <a class='button is-inverted is-primary' @click='gotoMain()'>
-      <b-icon icon='launch'></b-icon>
     </a>
     <a class='button is-inverted is-primary' @click='showSettings = true'>
       <b-icon icon='settings'></b-icon>

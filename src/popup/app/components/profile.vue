@@ -87,18 +87,18 @@ div#bs-popup-profile {
 
     > div:first-child {
       border-radius: 50%;
-      height: 24px;
-      width: 24px;
+      height: 100px;
+      width: 100px;
 
       display: flex;
       align-items: center;
       justify-content: center;
       text-transform: uppercase;
-      text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+      text-shadow: 4px 4px 1px rgba(0,0,0,0.1);
       line-height: 1;
       color: white;
       background-color: hsl(171, 100%, 41%);
-      font-size: 12px;
+      font-size: 48px;
       user-select: none;
       cursor: default;
     }
