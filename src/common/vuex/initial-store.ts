@@ -1,5 +1,5 @@
 import { StoreOptions } from 'vuex';
-import { makeDefaultApiClone, ApiSettingsType, BLOCKSTACK_INC } from '../settings/default';
+import { makeDefaultApiClone, ApiSettingsType } from '../settings/default';
 import { accountModule } from './stores/account.store';
 import { appsModule } from './stores/apps.store';
 import { registrationModule } from './stores/registration.store';

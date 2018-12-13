@@ -1,18 +1,9 @@
 import { GaiaHubConfig } from 'blockstack';
 
-export const BLOCKSTACK_INC = 'gaia-hub'
-
-export const REGTEST_CORE_API_PASSWORD = 'blockstack_integration_test_api_password'
-export const DEFAULT_CORE_PHONY_PASSWORD = 'PretendPasswordAPI'
-export const REGTEST_CORE_INSIGHT_API_URL = 'http://localhost:6270/insight-api/addr/{address}'
-
-// DEFAULT_API values are only used if
-// the user's settings.api state doesn't
-// already have an existing key.
-// To change a value, use a new key.
-
 export const DEFAULT_CORE_API_ENDPOINT = 'https://core.blockstack.org'
 export const REGTEST_CORE_API_ENDPOINT = 'http://localhost:6270'
+
+export const DEFAULT_GAIA_HUB = 'https://hub.blockstack.org'
 
 const DEFAULT_API = {
   coreApi: DEFAULT_CORE_API_ENDPOINT,
@@ -40,10 +31,10 @@ const DEFAULT_API = {
     }
   } as { [key: string]: { registerUrl: string } },*/
   // browserServerUrl: 'https://blockstack-browser-server.appartisan.com',
-  // hostedDataLocation: BLOCKSTACK_INC,
+  // hostedDataLocation: BLOCKSTACK_INC, // which is `gaia-hub`
   // coreHost: 'localhost',
   // corePort: 6270,
-  // coreApiPassword: DEFAULT_CORE_PHONY_PASSWORD,
+  // coreApiPassword: DEFAULT_CORE_PHONY_PASSWORD, // which is `PretendPasswordAPI`
   // regTestMode: false,
   storageConnected: false,
   gaiaHubConfig: null as GaiaHubConfig,
@@ -62,7 +53,7 @@ export function makeDefaultApiClone(): ApiSettingsType {
   return {
     // actual settings
     coreApi: DEFAULT_CORE_API_ENDPOINT,
-    gaiaHubUrl: 'https://hub.blockstack.org',
+    gaiaHubUrl: DEFAULT_GAIA_HUB,
     gaiaHubOverride: '',
 
     // things used by storage setup
