@@ -39,8 +39,11 @@ export default (Vue as VVue).component('bs-login', {
     },
   },
   mounted() {
+    console.log('mounted login');
     if(!this.$store.getters['account/isLoggedIn'])
-      this.$emit('done', false);
+      this.$emit('update:done', false);
+    else
+      this.$emit('update:done', true);
   },
   watch: {
     view(n) {
@@ -53,10 +56,10 @@ export default (Vue as VVue).component('bs-login', {
       if(this.$store.state.meta.logoutReason) commit('setLogoutReason', '');
       this.$validator.reset();
     },
-    loggedIn() {
-      this.view = '';
-      if(!this.$store.getters['account/isLoggedIn']) {
-        this.$emit('done', false);
+    loggedIn(n) {
+      if(!n) {
+        this.view = '';
+        this.$emit('update:done', false);
       }
     }
   },
@@ -69,7 +72,7 @@ export default (Vue as VVue).component('bs-login', {
     copy(text: string) {
       ccopy(text);
     },
-    initializeWallet() {
+    async initializeWallet() {
       console.log('Initializing Wallet!');
       let masterKeychain: bip32 = null;
       if(this.phrase && validateMnemonic(this.phrase)) {
@@ -88,7 +91,7 @@ export default (Vue as VVue).component('bs-login', {
               { email: this.email, encryptedBackupPhrase, masterKeychain: masterKeychain.toBase58() });
       });
     },
-    initializeIdentity() {
+    async initializeIdentity(autoGenProfile?: boolean) {
       console.log('Initializing identity...');
       return dispatch('connectSharedService')
         .then(() => dispatch('identity/downloadAll') as Promise<boolean[]>)
@@ -100,15 +103,22 @@ export default (Vue as VVue).component('bs-login', {
             const b = await dispatch('identity/download', { index: i }).then(() => true, () => false);
             if(b) continue;
             console.log('No profile (after two tries) for address ID-' + addrId + '.');
-            const res = await new Promise(resolve => this.$emit('showDialog', { type: 'confirm', options: {
-              title: 'Login - No Profile',
-              message: 'No profile found for ' + (i === 0 ? 'the main' : `a derived (${i})`) + ` identity ID-${addrId} - create a new one?`,
-              cancelText: 'Cancel & Logout',
-              confirmText: 'Go for it',
-              onConfirm: () => resolve(true),
-              onCancel: () => resolve(false)
-            }}));
-            if(res) {
+            let genProfile = autoGenProfile || false;
+            if(!autoGenProfile) {
+              this.$emit('working', false);
+              genProfile = await new Promise<boolean>(resolve => this.$emit('showDialog', { type: 'confirm', options: {
+                title: 'Login - No Profile',
+                message: 'No profile found for '
+                  + (i === 0 ? 'the main' : `a derived (${i})`)
+                  + ` identity ID-${addrId} - create a new one?`,
+                cancelText: 'Cancel & Logout',
+                confirmText: 'Go for it',
+                onConfirm: () => resolve(true),
+                onCancel: () => resolve(false)
+              }}));
+              this.$emit('working', true);
+            }
+            if(genProfile) {
               await dispatch('identity/upload', { i });
               console.log('Uploaded profile for ID {' + i + '}!');
             } else { await dispatch('logout'); this.$emit('working', false); return; }
@@ -150,7 +160,6 @@ export default (Vue as VVue).component('bs-login', {
     },
     register() {
       console.log('Registering!');
-      this.phrase = '';
       this.$emit('working', true);
 
       if(this.pass !== this.confirm) {
@@ -161,7 +170,7 @@ export default (Vue as VVue).component('bs-login', {
       }
 
       this.initializeWallet()
-        .then(() => this.initializeIdentity())
+        .then(() => this.initializeIdentity(true))
         .then(() => {
           console.log('Registered!');
           this.view = 'showKey';
@@ -180,7 +189,7 @@ export default (Vue as VVue).component('bs-login', {
     finish() {
       this.view = '';
       this.phrase = '';
-      this.$emit('done:update', true);
+      this.$emit('update:done', true);
       this.$emit('working', false);
     }
   }

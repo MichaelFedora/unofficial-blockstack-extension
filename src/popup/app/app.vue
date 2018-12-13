@@ -27,10 +27,10 @@
     </a>
   </div>
 
-  <bs-login v-show='!loggedIn' :done.sync='loginDone' @working='working = $event' @error='error = $event' @showDialog='showDialog'></bs-login>
+  <bs-login key='login' v-show='!loggedIn || !loginDone' :done.sync='loginDone' @working='working = $event' @error='error = $event' @showDialog='showDialog'></bs-login>
 
   <template v-if='loggedIn && loginDone'>
-  <div id='profile' class='container'>
+  <div class='container'>
     <div style='width: 100%'>
       <b-field>
         <b-input style='width: 100%;' name='search' placeholder='search apps' type='search' icon='magnify' v-model.trim='search'></b-input>
