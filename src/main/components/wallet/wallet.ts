@@ -15,7 +15,10 @@ export default (Vue as VVue).component('bs-main-wallet', {
       btcPrice: 1000,
       refreshing: false,
       selected: 'btc',
-      txs: []
+      txs: [],
+
+      btcPriceUrl: 'https://www.bitstamp.net/api/v2/ticker/btcusd/?cors=1',
+      networkFeeUrl: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
     };
   },
   computed: {
@@ -43,8 +46,8 @@ export default (Vue as VVue).component('bs-main-wallet', {
           // https://explorer.blockstack.org/insight-api/currency
           Axios.get('https://explorer.blockstack.org/insight-api/txs?address=' + this.address + '&pageNum=0')
               .then(res => res.data.txs),
-          Axios.get(this.$store.state.settings.api.btcPriceUrl)
-              .catch(() => fetch(this.$store.state.settings.api.btcPriceUrl).then(res => ({ data: res.json() })))
+          Axios.get(this.btcPriceUrl)
+              .catch(() => fetch(this.btcPriceUrl).then(res => ({ data: res.json() })))
               .then(res => res.data.last)/*,
                 () => Axios.get('https://api.coindesk.com/v1/bpi/currentprice/usd.json')
                       .then(res => res.data.bpi.USD.rate))*/
