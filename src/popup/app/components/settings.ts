@@ -7,6 +7,7 @@ import Axios, { AxiosResponse } from 'axios';
 import SemVer from 'semver';
 import { decrypt } from 'common/util';
 import ChangePasswordComponent from 'common/components/bs-change-password/bs-change-password';
+import { FieldFlags } from 'vee-validate';
 
 export default (Vue as VVue).component('bs-popup-settings', {
   props: {
@@ -15,27 +16,34 @@ export default (Vue as VVue).component('bs-popup-settings', {
   data() {
     return {
       coreApi: '',
-      gaiaHubOverride: '',
+      gaiaHubUrl: '',
       working: false,
     }
   },
   computed: {
     applicable: function() {
-      return this.coreApi !== this.currentCoreAPI || this.gaiaHubOverride !== this.currentGaiaHubOverride;
+      return this.coreApi !== this.currentCoreAPI || this.gaiaHubUrl !== this.currentGaiaHubUrl;
     },
     ...mapGetters({
       loggedIn: 'account/isLoggedIn'
-    }),
+    }) as { loggedIn: () => boolean },
     ...mapState({
-      gaiaHubUrl: (state: StateType) => state.settings.api.gaiaHubUrl,
+      currentGaiaHubUrl: (state: StateType) => state.settings.api.gaiaHubUrl,
       currentCoreAPI: (state: StateType) => state.settings.api.coreApi,
-      currentGaiaHubOverride: (state: StateType) => state.settings.api.gaiaHubOverride
-    }) as { gaiaHubUrl: () => string, currentCoreAPI: () => string, currentGaiaHubOverride: () => string }
+    }) as { currentCoreAPI: () => string, currentGaiaHubUrl: () => string },
+    fullForm: function() {
+      return this.coreApi && this.gaiaHubUrl ? true : false;
+    }
   },
   mounted() {
     this.cancel();
   },
   methods: {
+    getType(field: FieldFlags, ignoreTouched?: boolean) {
+      if(!field || (!field.dirty && (ignoreTouched || !field.touched))) return '';
+      if(field.valid) return 'is-success';
+      return 'is-danger';
+    },
     async apply() {
       this.working = true;
       let failed = '';
@@ -43,11 +51,11 @@ export default (Vue as VVue).component('bs-popup-settings', {
         let res: AxiosResponse<{ status: string, version: string }>;
         await Axios.get(this.coreApi + '/v1/node/ping').then(
           r => res = r,
-          e => failed = `Core node doesn't have /v1/node/ping or is not online.`);
+          e => failed = `Core node doesn't have /v1/node/ping, is not online, or is invalid.`);
         if(!failed && res.data && res.data.status && res.data.version) {
           const v = SemVer.coerce(res.data.version);
           if(res.data.status !== 'alive') failed = 'Core node does not have "alive" status.';
-          else if(!SemVer.valid(v)) failed = 'Core node does not have valid (coerced) SemVer version.'
+          else if(!SemVer.valid(v)) failed = 'Core node does not have valid (coerced) SemVer version.';
           else if (!SemVer.gte(v, '20.0.0')) failed = `Core node does not have version >= 20.0.0; is ${res.data.version} instead.`;
           else await commit('updateApi', { coreApi: this.coreApi });
         } else failed = failed || 'Core node ping response is not according to the `{ status: string, version: string }` schema.'
@@ -63,21 +71,32 @@ export default (Vue as VVue).component('bs-popup-settings', {
         }
       }
 
-      if(this.gaiaHubOverride !== this.currentGaiaHubOverride) {
+      if(this.gaiaHubUrl !== this.currentGaiaHubUrl) {
 
-        const oldOverride = this.currentGaiaHubOverride;
-
-        if(this.gaiaHubOverride === this.gaiaHubUrl) {
-          await commit('updateApi', { gaiaHubOverride: '' });
-          this.gaiaHubOverride = '';
-
-        } else await commit('updateApi', { gaiaHubOverride: this.gaiaHubOverride });
+        const oldGaiaHubUrl = this.currentGaiaHubUrl;
 
         await dispatch('resetApi').catch(e => console.error('Error resetting the Api settings: ' + e));
-        await dispatch('connectSharedService').catch(e => failed = 'Could not connect to Gaia Hub: ' + e);
+        await commit('updateApi', { gaiaHubUrl: this.gaiaHubUrl });
+        if(this.loggedIn) {
+          await dispatch('connectSharedService').catch(e => failed = 'Could not connect to Gaia Hub: ' + e);
+
+        } else {
+          let res: AxiosResponse<{ challenge_text: string, latest_auth_version: string, read_url_prefix: string }>;
+          await Axios.get(this.gaiaHubUrl + '/' + 'hub_info').then(
+            r => res = r,
+            e => failed = failed = `Gaia Hub doesn't have /hub_info, is not online, or is invalid.`);
+
+          if(!failed && res.data && res.data.latest_auth_version && res.data.read_url_prefix) {
+            const v = SemVer.coerce(res.data.latest_auth_version);
+            if(!SemVer.valid(v)) failed = 'Gaia Hub latest_auth_version does not have a valid (coerced) SemVer version.';
+            if(!SemVer.gte(v, '1.0.0')) failed = 'Gaia Hub latest_auth_version is not >= v1';
+            // check read_url_prefix?
+          } else failed = failed || 'Gaia Hub `/hub_info` response is not according to the'
+          + ' `{ latest_auth_version: string, read_url_prefix: string }` schema.'
+        }
 
         if(failed) {
-          await commit('updateApi', { gaiaHubOverride: oldOverride });
+          await commit('updateApi', { gaiaHubUrl: oldGaiaHubUrl });
           this.$dialog.alert({
             title: 'Error setting Gaia Hub Override',
             message: `<div class='content'><blockquote>${failed}</blockquote></div>`,
@@ -97,7 +116,7 @@ export default (Vue as VVue).component('bs-popup-settings', {
     },
     cancel() {
       this.coreApi = this.currentCoreAPI;
-      this.gaiaHubOverride = this.currentGaiaHubOverride;
+      this.gaiaHubUrl = this.currentGaiaHubUrl;
     },
     showRecoveryKey() {
       this.$dialog.prompt({

@@ -17,22 +17,22 @@
     <h1 class='title is-5'>Api Settings</h1>
 
     <section>
-      <b-field label='Core API Endpoint'>
-        <b-input v-model='coreApi'></b-input>
+      <b-field label='Core Api URL (https)'
+        :type='getType(fields.coreApi)'
+        :message='errors.first("coreApi")'>
+        <b-input v-model='coreApi' v-validate='{ url: { protocols: ["https"], require_protocol: true } }' name='coreApi'></b-input>
       </b-field>
 
-      <b-field label='GaiaHub URL'>
-        <b-input :value='gaiaHubUrl' disabled></b-input>
-      </b-field>
-
-      <b-field label='GaiaHub URL Override'>
-        <b-input v-model='gaiaHubOverride'></b-input>
+      <b-field label='Gaia Hub URL (https)'
+        :type='getType(fields.gaiaHubUrl)'
+        :message='errors.first("gaiaHubUrl")'>
+        <b-input v-model='gaiaHubUrl' v-validate='{ url: { protocols: ["https"], require_protocol: true } }' name='gaiaHubUrl'></b-input>
       </b-field>
     </section>
     <br>
 
     <div class='form-end'>
-      <button class='button' :disabled='!applicable' @click='cancel()'>Cancel</button>
+      <button class='button' :disabled='!applicable || errors.any() || !fullForm' @click='cancel()'>Cancel</button>
       <button class='button is-primary' :class='{ "is-loading": working }' :disabled='!applicable' @click='apply()'>Apply</button>
     </div>
   </div>

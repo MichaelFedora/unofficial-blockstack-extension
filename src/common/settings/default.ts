@@ -42,9 +42,6 @@ const DEFAULT_API = {
 
   // btcPriceUrl: 'https://www.bitstamp.net/api/v2/ticker/btcusd/?cors=1',
   // networkFeeUrl: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
-
-  // vvv added by me vvv
-  gaiaHubOverride: '',
 }
 
 export type ApiSettingsType = typeof DEFAULT_API;
@@ -54,7 +51,6 @@ export function makeDefaultApiClone(): ApiSettingsType {
     // actual settings
     coreApi: DEFAULT_CORE_API_ENDPOINT,
     gaiaHubUrl: DEFAULT_GAIA_HUB,
-    gaiaHubOverride: '',
 
     // things used by storage setup
     storageConnected: false,

@@ -60,7 +60,7 @@ export const initialStore: StoreOptions<StateType> = {
       if(!getters['account/isLoggedIn']) throw new Error('Not logged in!');
       if(state.settings.api.storageConnected &&
         state.settings.api.gaiaHubConfig) return; // already connected
-      const provider = state.settings.api.gaiaHubOverride || state.settings.api.gaiaHubUrl;
+      const provider = state.settings.api.gaiaHubUrl;
       const signer = state.account.identityAccount.keypairs[0].key; // identityKeypairs
       return connectToGaiaHub(provider, signer).then((gaiaHubConfig: GaiaHubConfig) => {
         commit('updateApi', {
