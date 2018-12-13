@@ -185,7 +185,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         ownerAddress = identity.ownerAddress;
       else
         ownerAddress = rootState.account.identityAccount.addresses[index];
-      return rootState.settings.api.gaiaHubConfig.url_prefix + '/' + ownerAddress + '/profile.json';
+      return rootState.settings.api.gaiaHubConfig.url_prefix + ownerAddress + '/profile.json';
     },
     async getProfileUploadLocation({ state, getters, rootState }, index?: number) {
       index = index || state.default;
