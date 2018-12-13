@@ -12,7 +12,7 @@
   <template v-else>
   <div id='header'>
     <figure><img src='/assets/images/icon-48.png'></figure>
-    <h4 class='title is-5' style='position: relative'>uBlockstack Ext</h4>
+    <h4 class='title is-5' style='position: relative'>uBlockstack</h4>
     <a class='profile-avatar' v-if='loggedIn' @click='showProfile = true'>
       <figure v-if='profileImg'><img :src='profileImg'></figure>
       <div v-else>
