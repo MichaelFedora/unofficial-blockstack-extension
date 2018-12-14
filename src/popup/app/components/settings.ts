@@ -8,6 +8,7 @@ import SemVer from 'semver';
 import { decrypt } from 'common/util';
 import ChangePasswordComponent from 'common/components/bs-change-password/bs-change-password';
 import { FieldFlags } from 'vee-validate';
+import { DEFAULT_CORE_API_ENDPOINT, DEFAULT_GAIA_HUB } from 'common/settings/default';
 
 export default (Vue as VVue).component('bs-popup-settings', {
   props: {
@@ -33,6 +34,9 @@ export default (Vue as VVue).component('bs-popup-settings', {
     }) as { currentCoreAPI: () => string, currentGaiaHubUrl: () => string },
     fullForm: function() {
       return this.coreApi && this.gaiaHubUrl ? true : false;
+    },
+    defaults: function() {
+      return this.coreApi === DEFAULT_CORE_API_ENDPOINT && this.gaiaHubUrl === DEFAULT_GAIA_HUB;
     }
   },
   mounted() {
@@ -117,6 +121,10 @@ export default (Vue as VVue).component('bs-popup-settings', {
     cancel() {
       this.coreApi = this.currentCoreAPI;
       this.gaiaHubUrl = this.currentGaiaHubUrl;
+    },
+    resetDefaults() {
+      this.coreApi = DEFAULT_CORE_API_ENDPOINT;
+      this.gaiaHubUrl = DEFAULT_GAIA_HUB;
     },
     showRecoveryKey() {
       this.$dialog.prompt({
