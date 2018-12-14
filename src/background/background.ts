@@ -105,7 +105,7 @@ Promise.all([
     .then(() => store.dispatch('identity/downloadAll') as Promise<boolean[]>)
     .then(results => Promise.all(results.map(async (a, i) => {
       if(a) return Promise.resolve();
-      const addrId = store.state.account.identityAccount.addresses[i];
+      const addrId = store.state.account.identities[i].keyPair.address;
       console.log('Trying to download profile for ID-' + addrId + ' again...');
       const b = await store.dispatch('identity/download', { index: i }).then(() => true, () => false);
       if(b) return Promise.resolve();

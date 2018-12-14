@@ -146,9 +146,9 @@ export default (Vue as VueConstructor<VVue>).extend({
       // login!
 
       const identity = this.$store.state.identity.localIdentities[this.currentIdentityIndex];
-      const identityKeypair = this.$store.state.account.identityAccount.keypairs[this.currentIdentityIndex];
+      const identityKeyPair = this.$store.state.account.identities[this.currentIdentityIndex].keyPair;
 
-      if(!identity || !identityKeypair) {
+      if(!identity || !identityKeyPair) {
         console.error(this.error = 'Identities not set up or not logged in!');
         return;
       }
@@ -193,10 +193,10 @@ export default (Vue as VueConstructor<VVue>).extend({
         return;
       }
 
-      const privateKey = identityKeypair.key;
+      const privateKey = identityKeyPair.key;
       const appPrivateKey = AppNode.fromAppsNode(
-        bip32.fromBase58(identityKeypair.appsNodeKey),
-         identityKeypair.salt,
+        bip32.fromBase58(identityKeyPair.appsNodeKey),
+         identityKeyPair.salt,
          appDomain).appPrivateKey;
 
       let profileUrlPromise
@@ -207,7 +207,7 @@ export default (Vue as VueConstructor<VVue>).extend({
           profileUrlPromise = Promise.resolve(profileUrlFomZonefile);
       }
 
-      // const gaiaBucketAddress = this.$store.state.account.identityAccount.keypairs[0].address;
+      // const gaiaBucketAddress = this.$store.state.account.identities.keyPairs[0].address;
       // const identityAddress = identityKeypair.address;
       // const gaiaUrlBase = this.$store.state.settings.api.gaiaHubConfig.url_prefix;
 

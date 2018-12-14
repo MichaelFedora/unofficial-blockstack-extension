@@ -184,7 +184,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       if(identity)
         ownerAddress = identity.ownerAddress;
       else
-        ownerAddress = rootState.account.identityAccount.addresses[index];
+        ownerAddress = rootState.account.identities[index].keyPair.address;
       return rootState.settings.api.gaiaHubConfig.url_prefix + ownerAddress + '/profile.json';
     },
     async getProfileUploadLocation({ state, getters, rootState }, index?: number) {
@@ -193,7 +193,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       const zoneFile = getters.getZoneFile(index);
       const gaiaHubConfig = rootState.settings.api.gaiaHubConfig;
       // using idaccount addr instead of `gaiaHubConfig.address`
-      if(!zoneFile) return gaiaHubConfig.url_prefix + rootState.account.identityAccount.addresses[index] + '/profile.json';
+      if(!zoneFile) return gaiaHubConfig.url_prefix + rootState.account.identities[index].keyPair.address + '/profile.json';
       else return getters.getTokenFileUrl(index);
     },
     async resolveProfile({ getters }, { publicKeyOrAddress }: { publicKeyOrAddress: string }) {
@@ -234,8 +234,8 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     async downloadProfiles({ state, dispatch, rootState }, { index }: { index?: number }) {
       index = index || state.default;
       const gaiaUrlBase = rootState.settings.api.gaiaHubConfig.url_prefix;
-      const firstAddress = rootState.account.identityAccount.keypairs[0].address;
-      const ownerAddress = rootState.account.identityAccount.keypairs[index].address;
+      const firstAddress = rootState.account.identities[0].keyPair.address;
+      const ownerAddress = rootState.account.identities[index].keyPair.address;
 
       const urls: string[] = [ await dispatch('getDefaultProfileUrl', { index }) ];
 
@@ -263,7 +263,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       return;
     },
     download({ commit, state, dispatch, rootState}, { index }: { index: number }) {
-      const addr = rootState.account.identityAccount.addresses[index];
+      const addr = rootState.account.identities[index].keyPair.address;
       if(!addr) {
         console.error('identity/download: index out of range: ', index);
         throw new Error('Cannot download identity from address which index is out of range!');
@@ -306,7 +306,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     },
     downloadAll({ dispatch, rootState }) {
       const proms = [];
-      const numAddrs = rootState.account.identityAccount.addresses.length;
+      const numAddrs = rootState.account.identities.length;
       for(let i = 0; i < numAddrs; i++) {
         proms.push(dispatch('download', { index: i }).then(() => true, () => false));
       }
@@ -314,15 +314,15 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     },
     async upload({ dispatch, state, rootState }, { index }: { index?: number }) {
       index = index || state.default;
-      const keypair = rootState.account.identityAccount.keypairs[index];
-      if(!keypair) throw new Error('No keypair in the index ' + index + '!');
+      const keyPair = rootState.account.identities[index].keyPair;
+      if(!keyPair) throw new Error('No keypair in the index ' + index + '!');
 
-      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keypair.key);
+      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keyPair.key);
       const globalHubConfig = rootState.settings.api.gaiaHubConfig;
 
       const url: string = await dispatch('getProfileUploadLocation', index);
       const profile = state.localIdentities[index].profile;
-      const token = signProfileToken(profile, keypair.key, { publicKey: keypair.keyId });
+      const token = signProfileToken(profile, keyPair.key, { publicKey: keyPair.keyId });
       const tokenRecords = [ wrapProfileToken(token) ];
 
       const signedProfileData = JSON.stringify(tokenRecords, null, 2);
@@ -335,12 +335,12 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       { index, file, name }: { index?: number, file: string, name?: string}) {
       index = index || state.default;
       name = name || 'avatar-0';
-      const keypair = rootState.account.identityAccount.keypairs[index];
-      if(!keypair) throw new Error('No keypair in the index ' + index + '!');
+      const keyPair = rootState.account.identities[index].keyPair;
+      if(!keyPair) throw new Error('No keypair in the index ' + index + '!');
       if(!state.localIdentities[index]) throw new Error('No local identity in the index ' + index + '!');
       if(!state.localIdentities[index].profile) throw new Error('No profile in the identity at index ' + index + '!');
 
-      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keypair.key);
+      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keyPair.key);
 
       let profileUploadLoc: string = await dispatch('getProfileUploadLocation', index);
       if(profileUploadLoc.endsWith('profile.json'))

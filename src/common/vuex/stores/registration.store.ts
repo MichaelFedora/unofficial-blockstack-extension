@@ -79,7 +79,7 @@ export const registrationModule: Module<RegistrationStateType, StateType> = {
       commit('reset');
     },
     /*async registerName({ state, commit },
-      { api, domainName, identity, identityIndex, ownerAddress, keypair, paymentKey }: {
+      { api, domainName, identity, identityIndex, ownerAddress, keyPair, paymentKey }: {
         api: {
           gaiaHubConfig: GaiaHubConfig,
           gaiaHubUrl: string,
@@ -91,11 +91,11 @@ export const registrationModule: Module<RegistrationStateType, StateType> = {
         identity: { zoneFile: string },
         identityIndex: number,
         ownerAddress: string,
-        keypair: { key: string },
+        keyPair: { key: string },
         paymentKey: string
     }) {
-      const signedProfileTokenData = signProfileForUpload(DEFAULT_PROFILE, keypair);
-      const profileUrl = await uploadProfile(api, identity, keypair, signedProfileTokenData);
+      const signedProfileTokenData = signProfileForUpload(DEFAULT_PROFILE, keyPair);
+      const profileUrl = await uploadProfile(api, identity, keyPair, signedProfileTokenData);
       const zoneFile = makeProfileZoneFile(domainName, profileUrl);
 
       const nameTokens = domainName.split('.');

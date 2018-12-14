@@ -1,24 +1,20 @@
-import { KeyPair } from '../../../data/identity-address-owner-node';
+import { KeyPair } from 'common/data/identity-address-owner-node';
 
 export interface AccountStateType {
   accountCreated: boolean;
-  promptedForEmail: boolean;
-  email: string;
+  email: string; // dumb =T
   encryptedBackupPhrase: string;
-  identityAccount: {
-    publicKeychain: string;
-    addresses: string[];
-    keypairs: KeyPair[];
-    addressIndex: number;
-  };
+  publicIdentityKeychain: string;
+  identities: {
+    keyPair: KeyPair;
+    index: number;
+  }[];
   bitcoinAccount: {
     publicKeychain: string;
     addresses: string[];
     balances: { [key: string]: number, total: number };
     addressIndex: number;
   };
-  viewedRecoveryCode: boolean;
-  connectedStorageAtLeastOnce: boolean;
 }
 
 export const SATOSHIS_IN_BTC = 100000000;

@@ -12,15 +12,10 @@ import { WrappedNode } from '../../data/wrapped-node';
 function makeState(): AccountStateType {
   return  {
     accountCreated: false,
-    promptedForEmail: false,
     email: '',
     encryptedBackupPhrase: '',
-    identityAccount: {
-      publicKeychain: '',
-      addresses: [],
-      keypairs: [],
-      addressIndex: 0
-    },
+    publicIdentityKeychain: '',
+    identities: [],
     bitcoinAccount: {
       publicKeychain: '',
       addresses: [] as string[],
@@ -28,9 +23,7 @@ function makeState(): AccountStateType {
         total: 0
       } as { [key: string]: number, total: number },
       addressIndex: 0
-    },
-    viewedRecoveryCode: false,
-    connectedStorageAtLeastOnce: false
+    }
   };
 }
 
@@ -46,13 +39,23 @@ export const accountModule: Module<AccountStateType, StateType> = {
     reset(state) {
       Object.assign(state, makeState());
     },
-    updateAccount(state, payload: Partial<AccountStateType>) {
+    update(state, payload: Partial<AccountStateType>) {
       Object.assign(state, payload);
     },
-    addIdentity(state, { keyPair }: { keyPair: KeyPair }) {
-      state.identityAccount.addresses.push(keyPair.address);
-      state.identityAccount.keypairs.push(keyPair);
-      state.identityAccount.addressIndex++;
+    addIdentity(state, { keyPair, index }: { keyPair: KeyPair, index?: number }) {
+      if(!index) {
+        if(state.identities.length > 0)
+          index = state.identities[state.identities.length - 1].index + 1;
+        else
+          index = 0;
+      }
+      state.identities.push({
+        keyPair: keyPair,
+        index: index
+      });
+      if(state.identities.length > 2)
+        state.identities.splice(0, state.identities.length,
+            ...state.identities.sort((a, b) => a.index - b.index));
     },
     updateBalances(state, { balances }: { balances: { [key: string]: number } }) {
       state.bitcoinAccount.balances = Object.assign(
@@ -62,24 +65,15 @@ export const accountModule: Module<AccountStateType, StateType> = {
       );
     },
     removeIdentity(state, { index }: { index: number}) {
-      if(index >= state.identityAccount.addresses.length || index <= 0)
-        return;
-
-      const addrs = state.identityAccount.addresses;
-      const keypairs = state.identityAccount.keypairs;
-
-      const newAddrs = addrs.slice(0, index).concat(addrs.slice(index + 1));
-      const newKeypairs = keypairs.slice(0, index).concat(keypairs.slice(index + 1));
-
-      state.identityAccount.addresses.splice(0, addrs.length, ...newAddrs);
-      state.identityAccount.keypairs.splice(0, keypairs.length, ...newKeypairs);
+      state.identities.splice(0, state.identities.length,
+        ...state.identities.filter(a => a.index !== index));
     }
   },
   actions: {
     async reset({ commit }) {
       commit('reset');
     },
-    async createAccount({ commit, dispatch, state }, { email, encryptedBackupPhrase, masterKeychain, identitiesToGenerate }: {
+    async createAccount({ commit, state }, { email, encryptedBackupPhrase, masterKeychain, identitiesToGenerate }: {
       email?: string,
       encryptedBackupPhrase: string,
       masterKeychain: string,
@@ -88,27 +82,24 @@ export const accountModule: Module<AccountStateType, StateType> = {
       identitiesToGenerate = (identitiesToGenerate && identitiesToGenerate >= 1) ? identitiesToGenerate : 1;
       const wrapped = new WrappedKeychain(WrappedNode.fromBase58(masterKeychain));
       const firstBitcoinAddress = wrapped.getFirstBitcoinAddress().getAddress();
-      const identityAddresses = [];
-      const identityKeypairs = [];
+      const identities: { keyPair: KeyPair, index: number }[] = [];
       // for-each address to generate...
       for(let i = 0; i < identitiesToGenerate; i++) {
         const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(i);
         const identityKeyPair = identityOwnerAddressNode.derivedIdentityKeyPair;
-        identityKeypairs.push(identityKeyPair);
-        identityAddresses.push(identityKeyPair.address);
+        identities.push({
+          keyPair: identityKeyPair,
+          index: i
+        });
         commit('identity/create', { ownerAddress: identityKeyPair.address }, { root: true });
       }
 
-      commit('updateAccount', {
+      commit('update', {
         email: email || state.email,
         accountCreated: true,
         encryptedBackupPhrase,
-        identityAccount: {
-          publicKeychain: wrapped.identityPublicKeychain.toBase58(),
-          addresses: identityAddresses,
-          keypairs: identityKeypairs,
-          addressIndex: identityAddresses.length
-        },
+        publicIdentityKeychain: wrapped.identityPublicKeychain.toBase58(),
+        identities,
         bitcoinAccount: {
           publicKeychain: wrapped.bitcoinPublicKeychain.toBase58(),
           addresses: [firstBitcoinAddress],
@@ -117,29 +108,38 @@ export const accountModule: Module<AccountStateType, StateType> = {
         }
       } as Partial<AccountStateType>);
     },
-    async createIdentity({ commit, state }, { password }: { password: string }) {
+    async createIdentity({ commit, state }, { password, index }: { password: string, index?: number }) {
       const phrase = await decrypt(state.encryptedBackupPhrase, password);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
+      if(!index) {
+        if(!state.identities.length) index = 0;
+        else index = state.identities[state.identities.length - 1].index + 1;
+      } else {
+        if(state.identities.find(a => a.index === index))
+          throw new Error('Identity with index ' + index + ' already exists!');
+        if(index < 0)
+          throw new Error('Cannot create an identity with an index < 0!');
+      }
 
       const seedBuffer = mnemonicToSeed(phrase);
       const masterKeychain = WrappedNode.fromSeed(seedBuffer);
       const wrapped = new WrappedKeychain(masterKeychain);
-      const nextIdentityIndex = state.identityAccount.addressIndex;
-      const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(nextIdentityIndex)
+      const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(index)
       const derivedIdentityKeyPair = identityOwnerAddressNode.derivedIdentityKeyPair;
 
       commit('addIdentity', { keyPair: derivedIdentityKeyPair });
       commit('identity/create', { ownerAddress: derivedIdentityKeyPair.address }, { root: true })
     },
-    async removeIdentity({ commit }, payload: { index: number }) {
-      commit('removeIdentity', { index: payload.index }),
-      commit('identity/remove', { index: payload.index }, { root: true })
+    async removeIdentity({ commit }, { index }: { index: number }) {
+      if(index <= 0) throw new Error('Cannot remove an identity less than 1!');
+      commit('removeIdentity', { index }),
+      commit('identity/remove', { index }, { root: true })
     },
     async changePassword({ state, commit }, { newpass, oldpass }: { newpass: string, oldpass: string }) {
       const phrase = await decrypt(state.encryptedBackupPhrase, oldpass);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
       const encryptedBackupPhrase = await encrypt(phrase, newpass);
-      commit('updateAccount', { encryptedBackupPhrase });
+      commit('update', { encryptedBackupPhrase });
     },
     async refreshBalances({ state, commit, rootState }) {
       const balances: { [key: string]: number } = { };

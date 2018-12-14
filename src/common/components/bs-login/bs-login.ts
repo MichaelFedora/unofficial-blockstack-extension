@@ -97,7 +97,7 @@ export default (Vue as VVue).component('bs-login', {
         .then(async results => {
           for(let i = 0, a = results[0]; i < results.length; a = results[++i]) {
             if(a) continue;
-            const addrId = this.$store.state.account.identityAccount.addresses[i];
+            const addrId = this.$store.state.account.identities[i].keyPair.address;
             console.log('Trying to download profile for ID-' + addrId + ' again...');
             const b = await dispatch('identity/download', { index: i }).then(() => true, () => false);
             if(b) continue;

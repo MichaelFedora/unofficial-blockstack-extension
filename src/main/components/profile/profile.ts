@@ -111,7 +111,7 @@ export default (Vue as VVue).component('bs-main-profile', {
             const identity = this.$store.state.identity.localIdentities[index];
             const a = await dispatch('identity/download', { index }).then(() => true, () => false);
             if(a) return this.$toast.open('Identity added!');
-            console.log('Trying to download profile for ID-' + this.$store.state.account.identityAccount.addresses[index] + ' again...');
+            console.log('Trying to download profile for ID-' + this.$store.state.account.identities[index].keyPair.address + ' again...');
             const b = await dispatch('identity/download', { index }).then(() => true, () => false);
             if(b) return this.$toast.open('Identity added!');
             console.warn(`No profile for the new identity ID-${identity.ownerAddress}: asking what to do!`);

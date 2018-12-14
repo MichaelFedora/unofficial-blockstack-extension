@@ -61,7 +61,7 @@ export const initialStore: StoreOptions<StateType> = {
       if(state.settings.api.storageConnected &&
         state.settings.api.gaiaHubConfig) return; // already connected
       const provider = state.settings.api.gaiaHubUrl;
-      const signer = state.account.identityAccount.keypairs[0].key; // identityKeypairs
+      const signer = state.account.identities[0].keyPair.key; // identityKeypairs
       return connectToGaiaHub(provider, signer).then((gaiaHubConfig: GaiaHubConfig) => {
         commit('updateApi', {
           gaiaHubConfig,
