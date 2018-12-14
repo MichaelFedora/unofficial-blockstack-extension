@@ -16,6 +16,7 @@ export default (Vue as VVue).component('bs-popup-settings', {
   },
   data() {
     return {
+      email: '',
       coreApi: '',
       gaiaHubUrl: '',
       working: false,
@@ -23,15 +24,18 @@ export default (Vue as VVue).component('bs-popup-settings', {
   },
   computed: {
     applicable: function() {
-      return this.coreApi !== this.currentCoreAPI || this.gaiaHubUrl !== this.currentGaiaHubUrl;
+      return this.email !== this.currentEmail ||
+            this.coreApi !== this.currentCoreAPI ||
+            this.gaiaHubUrl !== this.currentGaiaHubUrl;
     },
     ...mapGetters({
       loggedIn: 'account/isLoggedIn'
     }) as { loggedIn: () => boolean },
     ...mapState({
+      currentEmail: (state: StateType) => state.account.email,
       currentGaiaHubUrl: (state: StateType) => state.settings.api.gaiaHubUrl,
       currentCoreAPI: (state: StateType) => state.settings.api.coreApi,
-    }) as { currentCoreAPI: () => string, currentGaiaHubUrl: () => string },
+    }) as { currentEmail: () => string, currentCoreAPI: () => string, currentGaiaHubUrl: () => string },
     fullForm: function() {
       return this.coreApi && this.gaiaHubUrl ? true : false;
     },
@@ -51,6 +55,12 @@ export default (Vue as VVue).component('bs-popup-settings', {
     async apply() {
       this.working = true;
       let failed = '';
+      let failCount = 0;
+
+      if(this.email !== this.currentEmail) {
+        await commit('account/update', { email: this.email });
+      }
+
       if(this.coreApi !== this.currentCoreAPI) {
         let res: AxiosResponse<{ status: string, version: string }>;
         await Axios.get(this.coreApi + '/v1/node/ping').then(
@@ -65,13 +75,14 @@ export default (Vue as VVue).component('bs-popup-settings', {
         } else failed = failed || 'Core node ping response is not according to the `{ status: string, version: string }` schema.'
 
         if(failed) {
-          this.$dialog.alert({
+          await new Promise(resolve => this.$dialog.alert({
             title: 'Error setting Core API Url',
             message: `<div class='content'><blockquote>${failed}</blockquote></div>`,
             type: 'is-danger',
-          });
-          this.working = false;
-          return;
+            onConfirm: () => resolve()
+          }));
+          failed = '';
+          failCount++;
         }
       }
 
@@ -101,24 +112,34 @@ export default (Vue as VVue).component('bs-popup-settings', {
 
         if(failed) {
           await commit('updateApi', { gaiaHubUrl: oldGaiaHubUrl });
-          this.$dialog.alert({
+          await new Promise(resolve => this.$dialog.alert({
             title: 'Error setting Gaia Hub Override',
             message: `<div class='content'><blockquote>${failed}</blockquote></div>`,
             type: 'is-danger',
-          });
-          this.working = false;
-          return;
+            onConfirm: () => resolve()
+          }));
+          failed = '';
+          failCount++;
         }
       }
 
-      this.$dialog.alert({
-        title: 'Settings Saved',
-        message: 'Settings have been saved!',
-        type: 'is-success',
-      });
+      if(failCount <= 0) {
+        this.$dialog.alert({
+          title: 'Settings Saved',
+          message: 'Settings have been saved!',
+          type: 'is-success',
+        });
+      } else {
+        this.$dialog.alert({
+          title: 'Some Settings Saved',
+          message: 'Settings that worked have been saved!',
+          type: 'is-warning',
+        });
+      }
       this.working = false;
     },
     cancel() {
+      this.email = this.currentEmail;
       this.coreApi = this.currentCoreAPI;
       this.gaiaHubUrl = this.currentGaiaHubUrl;
     },

@@ -7,6 +7,12 @@
     <template v-if='loggedIn'>
       <h1 class='title is-5'>Account Settings</h1>
 
+      <b-field label='Account Email (optional)'
+        :type='getType(fields.email)'
+        :message='errors.first("email")'>
+        <b-input v-model='email' v-validate='"email"' name='email'></b-input>
+      </b-field>
+      <br>
       <section style='display: flex; flex-flow: column;'>
         <button class='button is-primary' style='margin-bottom: 1rem;' @click='showRecoveryKey()'>Show Recovery Key</button>
         <button class='button is-primary' @click='changePassword()'>Change Password</button>
