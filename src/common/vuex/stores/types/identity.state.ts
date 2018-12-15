@@ -1,3 +1,5 @@
+import { KeyPair } from 'common/data/identity-address-owner-node';
+
 export const DEFAULT_PROFILE: Profile = {
   '@type': 'Person',
   '@context': 'http://schema.org'
@@ -26,12 +28,12 @@ export interface Profile {
   apps?: { [key: string]: string };
 }
 
-interface Verification {
+/*interface Verification {
   service: string;
   proof_url: string;
   identifier: string;
   valid: boolean;
-}
+}*/
 
 export class LocalIdentity {
   username?: string;
@@ -39,29 +41,28 @@ export class LocalIdentity {
   usernameOwned: boolean;
   usernamePending: boolean;
   profile: Profile;
-  verifications: Verification[];
-  trustLevel: number;
-  registered: boolean;
-  ownerAddress: string;
+  address: string;
   zoneFile: string;
-  canAddUsername: boolean;
-  constructor(ownerAddress: string) {
+
+  keyPair: KeyPair;
+  index: number;
+
+  constructor(keyPair: KeyPair, index: number) {
     this.username = null;
     this.usernames = [];
     this.usernameOwned = false;
     this.usernamePending = false;
     this.profile = Object.assign({}, DEFAULT_PROFILE);
-    this.verifications = [];
-    this.trustLevel = 0;
-    this.registered = false;
-    this.ownerAddress = ownerAddress;
+    this.address = keyPair.address;
     this.zoneFile = '';
-    this.canAddUsername = false;
+
+    this.keyPair = keyPair;
+    this.index = index;
   }
 }
 
 export interface IdentityStateType {
+  publicKeychain: string;
   default: number;
-  localIdentities: LocalIdentity[];
-  createProfileError: boolean;
+  identities: LocalIdentity[];
 }

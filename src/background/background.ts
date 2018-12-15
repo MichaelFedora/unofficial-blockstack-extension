@@ -26,7 +26,7 @@ function search(text: string) {
 }
 
 browser.webRequest.onBeforeRequest.addListener((details) => {
-    if(/^data:/.test(details.url) || /\.(png|jpg)$/.test(details.url)) return;
+    if(/^(data|chrome-extension|moz-extension):/.test(details.url) || /\.(png|jpg)$/.test(details.url)) return;
     console.log('going places!', details.url);
 
     if(/blockstack\.org\/auth/.test(details.url)) {
@@ -105,15 +105,15 @@ Promise.all([
     .then(() => store.dispatch('identity/downloadAll') as Promise<boolean[]>)
     .then(results => Promise.all(results.map(async (a, i) => {
       if(a) return Promise.resolve();
-      const addrId = store.state.account.identities[i].keyPair.address;
-      console.log('Trying to download profile for ID-' + addrId + ' again...');
-      const b = await store.dispatch('identity/download', { index: i }).then(() => true, () => false);
+      const id = store.state.identity.identities[i];
+      console.log('Trying to download profile for ID-' + id.address + ' again...');
+      const b = await store.dispatch('identity/download', { index: id.index }).then(() => true, () => false);
       if(b) return Promise.resolve();
-      console.log('No profile (after two tries) for address ID-' + addrId + '; logging out!');
-      const errReason = `Couldn't fetch profile for ` + (i === 0 ? 'the main' : `a derived(${i})`) + ` identity ID-${addrId}.`;
+      console.log('No profile (after two tries) for address ID-' + id.address + '; logging out!');
+      const errReason = `Couldn't fetch profile for ` + (i === 0 ? 'the main' : `a derived(${id.index})`) + ` identity ID-${id.address}.`;
       await store.dispatch('logout', errReason);
       throw new Error(errReason);
-      // return store.dispatch('identity/upload', { index: i });
+      // return store.dispatch('identity/upload', { index: id.index });
     })))
     .then(() => console.log('Connected to shared service & initialized identity!'),
           err => console.error('Error connecting to shared service & initializing identity:', err)),

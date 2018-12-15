@@ -26,7 +26,7 @@ export default (Vue as VVue).component('bs-main-wallet-withdraw', {
     async send() {
       if(this.sending || !(this.recipient && this.amount && this.pass) || this.$validator.errors.any()) return;
       try {
-        if(this.$store.state.identity.localIdentities.find(a => a.usernamePending)) {
+        if(this.$store.state.identity.identities.find(a => a.usernamePending)) {
           const choice = await new Promise(resolve => {
             this.$dialog.confirm({
               message: 'Withdrawing BTC may interfere with the pending name registration you currently have.',

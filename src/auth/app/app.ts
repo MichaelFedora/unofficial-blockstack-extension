@@ -53,12 +53,12 @@ export default (Vue as VueConstructor<VVue>).extend({
       decodedToken: (null as any) as { header: AuthTokenHeader, payload: AuthTokenPayload },
       manifest: (null as any),
       authRequest: (null as any),
-      currentIdentityIndex: this.$store.state.identity.default
+      selectedIdx: this.$store.state.identity.identities.findIndex(a => a.index === this.$store.state.identity.default)
     }
   },
   computed: {
     ...mapState({
-      localIdentities: (state: StateType) => state.identity.localIdentities
+      localIdentities: (state: StateType) => state.identity.identities
     }),
     ...mapGetters({
       loggedIn: 'account/isLoggedIn'
@@ -135,7 +135,7 @@ export default (Vue as VueConstructor<VVue>).extend({
             ret.name += ' ' + id.profile.familyName;
         } else
           ret.name = id.profile.name || '';
-        ret.ownerAddress = id.ownerAddress;
+        ret.address = id.address;
         ret.username = id.username || '';
         return ret;
       }));
@@ -145,10 +145,9 @@ export default (Vue as VueConstructor<VVue>).extend({
       this.working = true;
       // login!
 
-      const identity = this.$store.state.identity.localIdentities[this.currentIdentityIndex];
-      const identityKeyPair = this.$store.state.account.identities[this.currentIdentityIndex].keyPair;
+      const identity = this.$store.state.identity.identities[this.selectedIdx];
 
-      if(!identity || !identityKeyPair) {
+      if(!identity) {
         console.error(this.error = 'Identities not set up or not logged in!');
         return;
       }
@@ -174,7 +173,7 @@ export default (Vue as VueConstructor<VVue>).extend({
         const json = JSON.parse(resText);
         if(json.address) {
           // const nameOwningAddress = json.address;
-          if(json.address === identity.ownerAddress) {
+          if(json.address === identity.address) {
             console.log('login: name has propageted on the network.');
             blockchainId = identity.username; // how odd...
           } else {
@@ -193,11 +192,11 @@ export default (Vue as VueConstructor<VVue>).extend({
         return;
       }
 
-      const privateKey = identityKeyPair.key;
+      const privateKey = identity.keyPair.key;
       const appPrivateKey = AppNode.fromAppsNode(
-        bip32.fromBase58(identityKeyPair.appsNodeKey),
-         identityKeyPair.salt,
-         appDomain).appPrivateKey;
+        bip32.fromBase58(identity.keyPair.appsNodeKey),
+          identity.keyPair.salt,
+          appDomain).appPrivateKey;
 
       let profileUrlPromise
 
@@ -207,8 +206,8 @@ export default (Vue as VueConstructor<VVue>).extend({
           profileUrlPromise = Promise.resolve(profileUrlFomZonefile);
       }
 
-      // const gaiaBucketAddress = this.$store.state.account.identities.keyPairs[0].address;
-      // const identityAddress = identityKeypair.address;
+      // const gaiaBucketAddress = this.$store.state.identity.identities[0].address;
+      // const identityAddress = identity.address;
       // const gaiaUrlBase = this.$store.state.settings.api.gaiaHubConfig.url_prefix;
 
       if(!profileUrlPromise)

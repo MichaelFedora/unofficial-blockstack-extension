@@ -29,7 +29,7 @@
           </div>
           <div>
             <span>{{profileName}}</span>
-            <span>ID-{{defaultIdentity.ownerAddress}}</span>
+            <span>ID-{{defaultIdentity.address}}</span>
           </div>
           <div>
             <b-icon icon='chevron-right'></b-icon>
@@ -63,7 +63,7 @@
             </div>
             <div>
               <span>{{profileName}}</span>
-              <span>ID-{{defaultIdentity.ownerAddress}}</span>
+              <span>ID-{{defaultIdentity.address}}</span>
             </div>
             <div>
               <b-icon icon='chevron-right'></b-icon>

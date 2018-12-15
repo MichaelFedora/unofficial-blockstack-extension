@@ -11,18 +11,18 @@ export default (Vue as VVue).component('bs-popup-profile', {
   },
   data() { return { } },
   computed: {
-    defaultId: function() { return this.localIdentities[this.defaultIndex]; },
+    defaultId: function() { return this.identities.find(a => a.index === this.defaultIndex); },
     profileName: function() { return this.getProfileName(this.defaultId); },
-    idString: function() { return this.defaultId ? `ID-${this.defaultId.ownerAddress}` : ''; },
+    idString: function() { return this.defaultId ? `ID-${this.defaultId.address}` : ''; },
     profileImg: function() { return this.getProfileImage(this.defaultId); },
     bio: function() { return this.getBio(this.defaultId); },
     otherIdentities: function() {
-      return this.localIdentities.filter((a, i) => i !== this.defaultIndex);
+      return this.identities.filter((a, i) => i !== this.defaultIndex);
     },
     ...mapState({
-      localIdentities: (state: StateType) => state.identity.localIdentities,
+      identities: (state: StateType) => state.identity.identities,
       defaultIndex: (state: StateType) => state.identity.default
-    }) as { localIdentities: () => LocalIdentity[], defaultIndex: () => number }
+    }) as { identities: () => LocalIdentity[], defaultIndex: () => number }
   },
   methods: {
     getBio(identity: LocalIdentity) {

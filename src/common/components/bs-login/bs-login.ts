@@ -97,19 +97,19 @@ export default (Vue as VVue).component('bs-login', {
         .then(async results => {
           for(let i = 0, a = results[0]; i < results.length; a = results[++i]) {
             if(a) continue;
-            const addrId = this.$store.state.account.identities[i].keyPair.address;
-            console.log('Trying to download profile for ID-' + addrId + ' again...');
-            const b = await dispatch('identity/download', { index: i }).then(() => true, () => false);
+            const id = this.$store.state.identity.identities[i];
+            console.log('Trying to download profile for ID-' + id.address + ' again...');
+            const b = await dispatch('identity/download', { index: id.index }).then(() => true, () => false);
             if(b) continue;
-            console.log('No profile (after two tries) for address ID-' + addrId + '.');
+            console.log('No profile (after two tries) for address ID-' + id.address + '.');
             let genProfile = autoGenProfile || false;
             if(!autoGenProfile) {
               this.$emit('working', false);
               genProfile = await new Promise<boolean>(resolve => this.$emit('showDialog', { type: 'confirm', options: {
                 title: 'Login - No Profile',
                 message: 'No profile found for '
-                  + (i === 0 ? 'the main' : `a derived (${i})`)
-                  + ` identity ID-${addrId} - create a new one?`,
+                  + (i === 0 ? 'the main' : `a derived (${id.index})`)
+                  + ` identity ID-${id.address} - create a new one?`,
                 cancelText: 'Cancel & Logout',
                 confirmText: 'Go for it',
                 onConfirm: () => resolve(true),
@@ -118,8 +118,8 @@ export default (Vue as VVue).component('bs-login', {
               this.$emit('working', true);
             }
             if(genProfile) {
-              await dispatch('identity/upload', { i });
-              console.log('Uploaded profile for ID {' + i + '}!');
+              await dispatch('identity/upload', { index: id.index });
+              console.log('Uploaded profile for ID {' + id.index + '}!');
             } else { await dispatch('logout'); this.$emit('working', false); return; }
           }
         });

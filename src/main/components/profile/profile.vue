@@ -5,16 +5,21 @@
 
   <div id='sidebar'>
     <div>
-      <a class='identity' v-for='(identity, i) of identities' :class='{ selected: current == i }' :key='identity.ownerAddress' @click='select(i)'>
+      <template v-for='identity of entries'>
+      <a class='identity' v-if='!identity.nextLoc' :class='{ selected: current == identity.index }' :key='identity.address' @click='select(identity.index)'>
         <figure v-if='getProfileImage(identity)'><img :src='getProfileImage(identity)'></figure>
         <div v-else>
           <span>{{(getProfileShortName(identity, true) || '?')[0] }}</span>
         </div>
         <div>
           <span>{{getProfileShortName(identity, true) || 'Anonymous' }}</span>
-          <span>ID-{{identity.ownerAddress}}</span>
+          <span>ID-{{identity.address}}</span>
         </div>
       </a>
+      <a class='identity-skip' v-else :key='identity.nextLoc' title='Add Identity Between' @click='addIdBetween(identity.nextLoc)'>
+        <span>{{identity.amt}} places skipped...</span>
+      </a>
+      </template>
     </div>
     <button class='button is-info fab is-br' title='Add Identity' @click='addId()'><b-icon icon='plus'></b-icon></button>
   </div>
@@ -28,7 +33,7 @@
       <h3 class='is-title is-4'>{{(selectedId.profile && selectedId.profile.name) || 'Anonymous'}}</h3>
       <h4 class='is-title is-5' style='padding: 0.375em 0' v-if='selectedId.username'>{{selectedId.username}}</h4>
       <button v-else class='button' style='margin-bottom: 1rem;' disabled title='Not Yet Implemented'>Add a Username</button>
-      <span>ID-{{selectedId.ownerAddress}}</span>
+      <span>ID-{{selectedId.address}}</span>
       <div class='button-bar'>
         <button class='button is-primary' :disabled='defaultSelected' @click='makeDefault()'>{{ defaultSelected ? 'Default' : 'Make Default' }}</button>
         <button class='button' @click='edit()'><span>Edit</span></button>
@@ -51,7 +56,7 @@
       </b-field>
       <h4 class='is-title is-5' style='padding: 0.375em 0' v-if='selectedId.username'>{{selectedId.username}}</h4>
       <button v-else class='button' style='margin-bottom: 1rem;' disabled title='Not Yet Implemented'>Add a Username</button>
-      <span>ID-{{selectedId.ownerAddress}}</span>
+      <span>ID-{{selectedId.address}}</span>
       <div class='button-bar'>
         <button class='button is-danger' @click='cancel()'><span>Cancel</span></button>
         <button class='button is-success' @click='save()'><span>Save</span></button>
@@ -78,6 +83,28 @@
     > div {
       display: flex;
       flex-flow: column;
+
+      > a.identity-skip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: inherit;
+        padding: 1rem;
+
+        &:not(:last-child) {
+          border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+        &:hover {
+          background-color: rgba(0,0,0,0.05);
+        }
+        &.selected {
+          background-color: rgba(0,0,0,0.15);
+        }
+
+        > span {
+          font-style: italic;
+        }
+      }
 
       > a.identity {
         display: flex;

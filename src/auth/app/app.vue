@@ -14,10 +14,10 @@
 
     <form>
       <b-field label='Choose a Blockstack ID to sign in with:'>
-        <b-select v-model='currentIdentityIndex' expanded>
+        <b-select v-model='selectedIdx' expanded>
           <option disabled value='0' v-if='userIds.length == 0'>No ID's available...</option>
-          <option v-for='(id, index) in userIds' :key='id.ownerAddress' :value='index'>
-            {{id.username || (id.name ? `${id.name}: ID-${id.ownerAddress}` : `ID-${id.ownerAddress}`)}}
+          <option v-for='(id, idx) in userIds' :key='id.address' :value='idx'>
+            {{id.username || (id.name ? `${id.name}: ID-${id.address}` : `ID-${id.address}`)}}
           </option>
         </b-select>
       </b-field>

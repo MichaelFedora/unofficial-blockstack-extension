@@ -52,18 +52,18 @@ export default (Vue as VVue).extend({
             .filter(a => !visible.find(b => b.name === a.name));
     },
     profileName: function() {
-      const identity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
+      const identity = this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
       if(!identity) return `{null}`;
       if(identity.username) return identity.username;
       if(identity.profile && identity.profile.name) return identity.profile.name;
       return '';
     },
     idString: function() {
-      const identity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
-      return identity ? `ID-${identity.ownerAddress}` : '';
+      const identity = this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
+      return identity ? `ID-${identity.address}` : '';
     },
     profileImg: function() {
-      const defaultIdentity = this.$store.state.identity.localIdentities[this.$store.state.identity.default];
+      const defaultIdentity = this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
       return (defaultIdentity &&
           defaultIdentity.profile &&
           defaultIdentity.profile.image &&

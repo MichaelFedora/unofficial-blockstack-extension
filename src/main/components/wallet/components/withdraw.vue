@@ -10,8 +10,8 @@
         <b-select v-model='walletIndex' disabled expanded>
           <option value='0'>Default Wallet</option>
           <!-- option disabled value='0' v-if='userIds.length == 0'>No ID's available...</option>
-          <option v-for='(id, index) in walletIds' :key='id.ownerAddress' :value='index'>
-            {{id.username || (id.name ? `${id.name}: ID-${id.ownerAddress}` : `ID-${id.ownerAddress}`)}}
+          <option v-for='(id, index) in walletIds' :key='id.address' :value='index'>
+            {{id.username || (id.name ? `${id.name}: ID-${id.address}` : `ID-${id.address}`)}}
           </option -->
         </b-select>
       </b-field>

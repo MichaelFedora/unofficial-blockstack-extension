@@ -14,20 +14,18 @@ import { StateType } from './types/state';
 import axios from 'axios';
 import { parseZoneFile } from 'zone-file';
 import { verifyProfileTokenRecord } from '../../token-util';
+import { KeyPair } from 'common/data/identity-address-owner-node';
+import { decrypt, tryUpload } from 'common/util';
+import { validateMnemonic, mnemonicToSeed } from 'bip39';
+import { WrappedNode } from 'common/data/wrapped-node';
+import WrappedKeychain from 'common/data/wrapped-keychain';
 
 function makeState(): IdentityStateType {
   return {
+    publicKeychain: '',
     default: 0,
-    localIdentities: [],
-    createProfileError: null
+    identities: [],
   };
-}
-
-function tryUpload(url: string, data: any, hubConfig: GaiaHubConfig, mimeType?: string) {
-  const readPrefix = `${hubConfig.url_prefix}${hubConfig.address}/`;
-  if(!url.startsWith(readPrefix)) return Promise.reject(new Error(`Url doesn't start with the right prefix!`));
-  else url = url.substring(readPrefix.length);
-  return uploadToGaiaHub(url, data, hubConfig, mimeType);
 }
 
 export const identityModule: Module<IdentityStateType, StateType> = {
@@ -38,58 +36,71 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       Object.assign(state, makeState());
     },
     setDefault(state, { index }: { index: number }) {
-      if(index === 0 || (index > 0 && index < state.localIdentities.length))
+      if(state.identities.find(a => a.index === index))
         state.default = index;
     },
-    create(state, payload: Partial<LocalIdentity> & { ownerAddress: string }) {
-      state.localIdentities.push(Object.assign({}, new LocalIdentity(payload.ownerAddress), payload));
+    setPublicKeychain(state, { publicKeychain }: { publicKeychain: string }) {
+      state.publicKeychain = publicKeychain || '';
+    },
+    create(state, payload: Partial<LocalIdentity> & { keyPair: KeyPair, index?: number }) {
+
+      if(!payload.index) {
+        if(state.identities.length > 0)
+          payload.index = state.identities[state.identities.length - 1].index + 1;
+        else
+          payload.index = 0;
+      }
+
+      state.identities.push(Object.assign({}, new LocalIdentity(payload.keyPair, payload.index), payload));
+
+      if(state.identities.length > 2)
+        state.identities.sort((a, b) => a.index - b.index);
     },
     update(state, { index, payload }: { index: number, payload: Partial<LocalIdentity> }) {
-      if(!(state.localIdentities[index] && state.localIdentities[index].ownerAddress)) {
-        console.error(`Can't update local identity at index ${index}; it doesn't exist (or doesn't have an ownerAddress)!`);
+      const idx = state.identities.findIndex(a => a.index === index);
+      const id = state.identities[idx];
+      if(!id) {
+        console.error(`Can't update local identity at index ${index}; it doesn't exist!`);
         return;
       }
-      let profile;
+      let profile: Profile;
       if(payload.profile)
-        profile = Object.assign({}, DEFAULT_PROFILE, state.localIdentities[index].profile, payload.profile);
+        profile = Object.assign({}, DEFAULT_PROFILE, id.profile, payload.profile);
 
-      Vue.set(state.localIdentities, index, Object.assign(
+      Vue.set(state.identities, idx, Object.assign(
           {},
-          state.localIdentities[index],
+          id,
           payload,
           profile ? { profile } : undefined));
     },
     updateApp(state, { index, domain, payload }: { index: number, domain: string, payload: any }) {
-      if(!(state.localIdentities[index] && state.localIdentities[index].ownerAddress)) {
-        console.error(`Can't update local identitiy's apps at index ${index}; it doesn't exist (or doesn't have an ownerAddress)!`);
+      const id = state.identities.find(a => a.index === index);
+      if(!id) {
+        console.error(`Can't update local identitiy's apps at index ${index}; it doesn't exist!`);
         return;
       }
-      if(!state.localIdentities[index].profile.apps)
-        Vue.set(state.localIdentities[index].profile, 'apps', { [domain]: payload });
+      if(!id.profile.apps)
+        Vue.set(id.profile, 'apps', { [domain]: payload });
       else
-        Vue.set(state.localIdentities[index].profile.apps, domain, payload);
+        Vue.set(id.profile.apps, domain, payload);
     },
     remove(state, { index }: { index: number }) {
-      if(index >= state.localIdentities.length || index <= 0)
-        return;
+      if(index === 0) return;
+      if(index === state.default) state.default = 0;
 
-      const ids = state.localIdentities;
-      const newIds = ids.slice(0, index).concat(ids.slice(index + 1));
-      state.localIdentities.splice(0, ids.length, ...newIds);
-
-      if(state.default >= state.localIdentities.length)
-        state.default = state.localIdentities.length - 1;
-      if(state.default < 0) state.default = 0;
+      state.identities.splice(0, state.identities.length,
+        ...state.identities.filter(a => a && a.index !== index));
     },
     addProfileImage(state, { index, payload }: { index?: number, payload: any }) {
       index = index || state.default;
-      if(!state.localIdentities[index] || !state.localIdentities[index].profile) {
+      const id = state.identities.find(a => a.index === index);
+      if(!id || !id.profile) {
         console.error('No profile on index ' + index + ' to upload image to.');
         return;
       }
 
-      if(!state.localIdentities[index].profile.image) {
-        Vue.set(state.localIdentities[index].profile, 'image', [
+      if(!id.profile.image) {
+        Vue.set(id.profile, 'image', [
           Object.assign({
             '@type': 'ImageObject',
             name: '',
@@ -99,30 +110,28 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       } else {
 
         // sanitize
-
-        if(state.localIdentities[index].profile.image.length > 1) {
-          const newImages = state.localIdentities[index].profile.image.reduce((acc, v) => {
+        if(id.profile.image.length > 1) {
+          const newImages = id.profile.image.reduce((acc, v) => {
             if(!acc.find(a => a.name === v.name))
               acc.push(v);
             return acc;
           }, []);
-          if(newImages.length !== state.localIdentities[index].profile.image.length)
-            Vue.set(state.localIdentities[index].profile, 'image', newImages);
+          if(newImages.length !== id.profile.image.length)
+            Vue.set(id.profile, 'image', newImages);
         }
 
         // insert
-
-        const i = state.localIdentities[index].profile.image.findIndex(a => a.name === payload.name);
+        const i = id.profile.image.findIndex(a => a.name === payload.name);
         if(i >= 0) {
-          Vue.set(state.localIdentities[index].profile.image, i, Object.assign({
+          Vue.set(id.profile.image, i, Object.assign({
               '@type': 'ImageObject',
               name: '',
               contentUrl: ''
             },
-            state.localIdentities[index].profile.image[i],
+            id.profile.image[i],
             payload));
         } else {
-          state.localIdentities[index].profile.image.push(Object.assign({
+          id.profile.image.push(Object.assign({
               '@type': 'ImageObject',
               name: '',
               contentUrl: ''
@@ -134,16 +143,17 @@ export const identityModule: Module<IdentityStateType, StateType> = {
   },
   getters: {
     defaultId: (state) => {
-      const id = state.localIdentities[state.default];
+      const id = state.identities.find(a => a.index === state.default);
       if(!id) return '{null}';
       if(id.username) return id.username;
-      if(id.profile && id.profile.name) return `${id.profile.name}: ID-${id.ownerAddress}`;
-      return `ID-${id.ownerAddress}`;
+      if(id.profile && id.profile.name) return `${id.profile.name}: ID-${id.address}`;
+      return `ID-${id.address}`;
     },
     getZoneFile: (state) => (index?: number) => {
       index = index || state.default;
-      if(!state.localIdentities[index]) return null;
-      return state.localIdentities[index].zoneFile;
+      const id = state.identities.find(a => a.index === index);
+      if(!id) return null;
+      return id.zoneFile;
     },
     getTokenFileUrl: (state, getters) => (index?: number) => {
       const zoneFile = getters.getZoneFile(index);
@@ -174,26 +184,49 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     reset({ commit }) {
       commit('reset');
     },
+    async create({ commit, state, rootState }, { password, index }: { password: string, index?: number }) {
+      const phrase = await decrypt(rootState.account.encryptedBackupPhrase, password);
+      if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
+      if(!index) {
+        if(!state.identities.length) index = 0;
+        else index = state.identities[state.identities.length - 1].index + 1;
+      } else {
+        if(state.identities.find(a => a.index === index))
+          throw new Error('Identity with index ' + index + ' already exists!');
+        if(index < 0)
+          throw new Error('Cannot create an identity with an index < 0!');
+      }
+
+      const seedBuffer = mnemonicToSeed(phrase);
+      const masterKeychain = WrappedNode.fromSeed(seedBuffer);
+      const wrapped = new WrappedKeychain(masterKeychain);
+      const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(index);
+      const derivedIdentityKeyPair = identityOwnerAddressNode.derivedIdentityKeyPair;
+
+      commit('create', { keyPair: derivedIdentityKeyPair, index: index });
+    },
+    async remove({ commit, state }, { index }: { index: number }) {
+      if(!state.identities.find(a => a.index === index)) throw new Error('No identity exists with index ' + index);
+      commit('remove', { index });
+    },
     async getDefaultProfileUrl({ state, rootState }, payload: { index?: number }) {
       let index;
       if(!payload || !payload.index) index = state.default;
       else index = payload.index;
 
-      const identity = state.localIdentities[index];
-      let ownerAddress: string;
-      if(identity)
-        ownerAddress = identity.ownerAddress;
-      else
-        ownerAddress = rootState.account.identities[index].keyPair.address;
-      return rootState.settings.api.gaiaHubConfig.url_prefix + ownerAddress + '/profile.json';
+      const id = state.identities.find(a => a.index === index);
+      if(!id) throw new Error('No ID found with index ' + index + '!');
+      return rootState.settings.api.gaiaHubConfig.url_prefix + id.address + '/profile.json';
     },
     async getProfileUploadLocation({ state, getters, rootState }, index?: number) {
       index = index || state.default;
+      const id = state.identities.find(a => a.index === index);
+      if(!id) throw new Error('No ID found with index ' + index + '!');
 
       const zoneFile = getters.getZoneFile(index);
       const gaiaHubConfig = rootState.settings.api.gaiaHubConfig;
-      // using idaccount addr instead of `gaiaHubConfig.address`
-      if(!zoneFile) return gaiaHubConfig.url_prefix + rootState.account.identities[index].keyPair.address + '/profile.json';
+      // using id account addr instead of `gaiaHubConfig.address`
+      if(!zoneFile) return gaiaHubConfig.url_prefix + id.address + '/profile.json';
       else return getters.getTokenFileUrl(index);
     },
     async resolveProfile({ getters }, { publicKeyOrAddress }: { publicKeyOrAddress: string }) {
@@ -234,13 +267,14 @@ export const identityModule: Module<IdentityStateType, StateType> = {
     async downloadProfiles({ state, dispatch, rootState }, { index }: { index?: number }) {
       index = index || state.default;
       const gaiaUrlBase = rootState.settings.api.gaiaHubConfig.url_prefix;
-      const firstAddress = rootState.account.identities[0].keyPair.address;
-      const ownerAddress = rootState.account.identities[index].keyPair.address;
+      const firstAddress = state.identities[0].address;
+      const id = state.identities.find(a => a.index === index);
+      if(!id) throw new Error('No ID found with index ' + index + '!');
 
       const urls: string[] = [ await dispatch('getDefaultProfileUrl', { index }) ];
 
       if(index < 2) {
-        urls.push(gaiaUrlBase + '/' + firstAddress + '/' + ownerAddress + '/profile.json');
+        urls.push(gaiaUrlBase + '/' + firstAddress + '/' + id.address + '/profile.json');
       } else if (index % 2 === 1) {
         const buggedIndex = 1 + Math.floor(index / 2); // apparently, blockstack counts in odd integers
         urls.push(gaiaUrlBase + '/' + firstAddress + '/' + buggedIndex + '/profile.json');
@@ -251,7 +285,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
           const res = await axios.get(url)
           const profile = { };
           for(const tokenRecord of res.data) {
-            const decodedToken = verifyProfileTokenRecord(tokenRecord, ownerAddress);
+            const decodedToken = verifyProfileTokenRecord(tokenRecord, id.address);
             Object.assign(profile, decodedToken.payload.claim);
           }
           return { profile, profileUrl: url };
@@ -263,25 +297,21 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       return;
     },
     download({ commit, state, dispatch, rootState}, { index }: { index: number }) {
-      const addr = rootState.account.identities[index].keyPair.address;
-      if(!addr) {
-        console.error('identity/download: index out of range: ', index);
-        throw new Error('Cannot download identity from address which index is out of range!');
-      }
-      if(!state.localIdentities[index])
-        commit('create', { ownerAddress: addr });
+      const id = state.identities.find(a => a.index === index);
+      if(!id) throw new Error('No ID found with index ' + index + '!');
+
       const url = rootState.settings.api.bitcoinAddressLookupUrl
           .replace('{coreApi}', rootState.settings.api.coreApi)
-          .replace('{address}', addr);
+          .replace('{address}', id.address);
       return axios.get(url).then(res => {
         if(res.data.names.length === 0) {
-          console.log('Address ' + addr + ' has no names, checking default locations.');
+          console.log('Address ' + id.address + ' has no names, checking default locations.');
           return dispatch('downloadProfiles', { index: index }).then((data?: any) => {
             if(!(data && data.profile)) throw new Error('No profile data found!');
             commit('update', { index: index, payload: { profile: data.profile, zoneFile: '' } });
-          }, e => console.error('Error fetching info for address ' + addr + ':', e));
+          }, e => console.error('Error fetching info for address ' + id.address + ':', e));
         } else {
-          if(res.data.names.length > 1) console.warn('Address ' + addr + ' has multiple names; only using the first!');
+          if(res.data.names.length > 1) console.warn('Address ' + id.address + ' has multiple names; only using the first!');
           commit('update', {
             index: index,
             payload: { username: res.data.names[0], usernames: res.data.names, usernamePending: false, usernameOwned: true }
@@ -304,25 +334,24 @@ export const identityModule: Module<IdentityStateType, StateType> = {
         }
       });
     },
-    downloadAll({ dispatch, rootState }) {
+    downloadAll({ dispatch, state }) {
       const proms = [];
-      const numAddrs = rootState.account.identities.length;
-      for(let i = 0; i < numAddrs; i++) {
-        proms.push(dispatch('download', { index: i }).then(() => true, () => false));
+      for(const id of state.identities) {
+        proms.push(dispatch('download', { index: id.index }).then(() => true, () => false));
       }
       return Promise.all(proms);
     },
     async upload({ dispatch, state, rootState }, { index }: { index?: number }) {
       index = index || state.default;
-      const keyPair = rootState.account.identities[index].keyPair;
-      if(!keyPair) throw new Error('No keypair in the index ' + index + '!');
+      const id = state.identities.find(a => a.index === index);
+      if(!id) throw new Error('No ID found with index ' + index + '!');
 
-      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keyPair.key);
+      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, id.keyPair.key);
       const globalHubConfig = rootState.settings.api.gaiaHubConfig;
 
       const url: string = await dispatch('getProfileUploadLocation', index);
-      const profile = state.localIdentities[index].profile;
-      const token = signProfileToken(profile, keyPair.key, { publicKey: keyPair.keyId });
+      const profile = id.profile;
+      const token = signProfileToken(profile, id.keyPair.key, { publicKey: id.keyPair.keyId });
       const tokenRecords = [ wrapProfileToken(token) ];
 
       const signedProfileData = JSON.stringify(tokenRecords, null, 2);
@@ -331,31 +360,6 @@ export const identityModule: Module<IdentityStateType, StateType> = {
           .catch(() => tryUpload(url, signedProfileData, globalHubConfig, 'application/json'))
           .catch(e => Promise.reject(new Error(`Issue writing to ${url}: ` + e)));
     },
-    async uploadProfileImage({ commit, dispatch, state, rootState },
-      { index, file, name }: { index?: number, file: string, name?: string}) {
-      index = index || state.default;
-      name = name || 'avatar-0';
-      const keyPair = rootState.account.identities[index].keyPair;
-      if(!keyPair) throw new Error('No keypair in the index ' + index + '!');
-      if(!state.localIdentities[index]) throw new Error('No local identity in the index ' + index + '!');
-      if(!state.localIdentities[index].profile) throw new Error('No profile in the identity at index ' + index + '!');
-
-      const identityHubConfig = await connectToGaiaHub(rootState.settings.api.gaiaHubUrl, keyPair.key);
-
-      let profileUploadLoc: string = await dispatch('getProfileUploadLocation', index);
-      if(profileUploadLoc.endsWith('profile.json'))
-        profileUploadLoc = profileUploadLoc.substr(0, profileUploadLoc.length - 'profile.json'.length);
-      else
-        throw new Error(`Can't determine profile-photo storage location (no profile.json in upload location): ${profileUploadLoc}`);
-
-      const url = profileUploadLoc + '/' + name;
-      return tryUpload(url, file, identityHubConfig)
-        .catch(() => tryUpload(url, file, rootState.settings.api.gaiaHubConfig))
-        .then(() => {
-          commit('addProfileImage', { index, payload: { name: name.replace(/-\d+$/, ''), contentUrl: url }});
-          return dispatch('upload', { index });
-        }, e => Promise.reject(new Error(`Issue writing to ${url}: ` + e)));
-    }
   }
 }
 

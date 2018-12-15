@@ -4,11 +4,6 @@ export interface AccountStateType {
   accountCreated: boolean;
   email: string; // dumb =T
   encryptedBackupPhrase: string;
-  publicIdentityKeychain: string;
-  identities: {
-    keyPair: KeyPair;
-    index: number;
-  }[];
   bitcoinAccount: {
     publicKeychain: string;
     addresses: string[];

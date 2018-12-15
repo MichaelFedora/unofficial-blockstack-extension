@@ -22,7 +22,7 @@ export default (Vue as VVue).extend({
   },
   computed: {
     defaultIdentity: function() {
-      return this.$store.state.identity.localIdentities[this.$store.state.identity.default];
+      return this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
     },
     profileName: function() {
       return this.getProfileName(this.defaultIdentity, true);
@@ -36,7 +36,7 @@ export default (Vue as VVue).extend({
     },
     ...mapState({
       defaultIdIndex: (state: StateType) => state.identity.default,
-      identities: (state: StateType) => state.identity.localIdentities
+      identities: (state: StateType) => state.identity.identities
     })
   },
   mounted() {
@@ -64,7 +64,7 @@ export default (Vue as VVue).extend({
       if(!id) return `{null}`;
       if(id.username) return id.username;
       if(id.profile && id.profile.name) return id.profile.name;
-      if(!noFallback) return `ID-${id.ownerAddress}`;
+      if(!noFallback) return `ID-${id.address}`;
     },
     active(url: string, absolute: boolean) {
       return absolute ? this.$route.path === url :
