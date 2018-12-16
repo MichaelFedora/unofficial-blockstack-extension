@@ -6,9 +6,9 @@ popup windows instead of through https://browser.blockstack.org/ or
 having to run their own instance of the Blockstack Browser. This makes
 the experience much more native and easy to use!
 
-Currently you can not edit your profile or manage your wallet. This is
-more of a proof of concept then a finished product, and it may have bugs;
-use it at your own risk!
+This browser does not quite have feature parity with the official browser,
+as it is missing the ability to acquire usernames and does not include
+the email scope for apps (yet).
 
 ![screenshot-1](/gfx/screenshot-1.png)
 
@@ -17,21 +17,17 @@ Forum discussion can be found [here](https://forum.blockstack.org/t/5414).
 ## Features
 
 - Creating/Recovering Accounts
-- Managing Multiple Identities
+- Managing Multiple Identities (at any offset)
 - App Authentication
 - App lookup via [app.co's repo](https://app-co-api.herokuapp.com/api/apps)
+- Blockstack Wallet Management (BTC)
+- Blockstack Profile & Identity Management
+- API Setting Verification
+- Ability to set/change your account email
 
-## Downloads (for Alpha Version)
+## Downloads (for Beta Version)
 
-**This extension is in alpha, and may accidently overwrite your profile.json resulting in loss of:**
-
-- Profile Name
-- Profile Bio
-- Social Verifications
-- Ability for people who you shared files with to view those files
-- Breaking apps that rely on multi-player data storage
-
-**Don't use your normal Blockstack ID to test this with!**
+***Wallet Transactions have not been tested yet -- use at your own risk!***
 
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/u-blockstack-extension/)
 - [Chrome](https://chrome.google.com/webstore/detail/unofficial-blockstack-ext/ldkenndopbdlbphmdmnmanmkhcjahmnm)
@@ -39,7 +35,8 @@ Forum discussion can be found [here](https://forum.blockstack.org/t/5414).
 ## Building
 
 - `npm run build` will create a built extension in the `/build` directory.
-- `npm run build:prod` will build production.
+- `npm run build:prod` will build production. It is allocated for 4Gb of memory however, so make sure you have space.
+  - currently it has been recorded to take ~2.5Gb however
 
 ## Testing
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "(Unofficial) Blockstack Extension",
-  "short_name": "Blockstack",
-  "version": "1.0",
+  "short_name": "uBlockstack",
+  "version": "2.0",
   "author": "Michael Fedora",
   "homepage_url": "https://github.com/michaelfedora/unofficial-blockstack-extension",
 
