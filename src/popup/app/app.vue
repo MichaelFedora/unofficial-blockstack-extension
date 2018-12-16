@@ -40,7 +40,7 @@
       <template v-if='recentApps.length > 0'>
       <h5 class='title is-6' style='margin-bottom: 1rem' v-show='recentApps.length > 0'>Recent Apps</h5>
       <div class='results-apps'>
-        <a v-for='app of recentApps' :key='app.name' :href='app.website'>
+        <a v-for='app of recentApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
           <img :src='app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
@@ -49,7 +49,7 @@
       <template v-if='pinnedApps.length > 0'>
       <h5 class='title is-6' style='margin: 1rem 0'>Pinned Apps</h5>
       <div class='results-apps'>
-        <a v-for='app of pinnedApps' :key='app.name' :href='app.website'>
+        <a v-for='app of pinnedApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
           <img :src='app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
@@ -58,7 +58,7 @@
       <template v-else-if='recommendedApps.length > 0'>
       <h5 class='title is-6' style='margin: 1rem 0'>Recommended Apps</h5>
       <div class='results-apps'>
-        <a v-for='app of recommendedApps' :key='app.name' :href='app.website'>
+        <a v-for='app of recommendedApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
           <img :src='app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
@@ -67,7 +67,7 @@
     </div>
     <div v-else style='width: 100%'>
       <div class='results-apps'>
-        <a v-for='app of appResults' :key='app.name' :href='app.website'>
+        <a v-for='app of appResults' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
           <img :src='app.imageUrl'>
           <span>{{app.name}}</span>
         </a>

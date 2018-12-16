@@ -173,9 +173,10 @@
               font-weight: 600;
             }
             &:last-child {
+              font-size: 0.75rem;
               text-overflow: ellipsis;
               overflow: hidden;
-              font-size: 0.75rem;
+              white-space: nowrap;
             }
           }
         }
