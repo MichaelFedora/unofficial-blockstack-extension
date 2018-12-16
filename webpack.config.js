@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const autoprefixer = require('autoprefixer');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const TerserJsPlugin = require('terser-webpack-plugin')
 
 module.exports = (env, argv) => {
 
@@ -23,7 +23,7 @@ return {
   },
 
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, production ? 'build-prod' : 'build'),
     filename: '[name].js',
   },
 
@@ -75,7 +75,7 @@ return {
   devtool: production ? '' : 'inline-source-map',
 
   optimization: {
-    minimizer: [ new UglifyJsPlugin({ uglifyOptions: { mangle: { reserved: [
+    minimizer: [ new TerserJsPlugin({ terserOptions: { mangle: { reserved: [
                 'Buffer',
                 'BigInteger',
                 'Point',
@@ -89,9 +89,9 @@ return {
   },
 
   plugins: [
-    new CleanWebpackPlugin(['build']),
+    new CleanWebpackPlugin([ production ? 'build-prod' : 'build' ]),
     new VueLoaderPlugin(),
-    new ForkTsCheckWebpackPlugin(),
+    // new ForkTsCheckWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css'
     }),

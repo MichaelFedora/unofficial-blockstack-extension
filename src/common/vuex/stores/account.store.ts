@@ -2,11 +2,10 @@ import { Module } from 'vuex';
 import { WrappedKeychain } from '../../data/wrapped-keychain';
 import { AccountStateType, SATOSHIS_IN_BTC } from './types/account.state';
 import { StateType } from './types/state';
-import { decrypt, encrypt, getAddress } from '../../util';
+import { decrypt, encrypt } from '../../util';
 import { validateMnemonic, mnemonicToSeed } from 'bip39';
-import { KeyPair } from '../../data/identity-address-owner-node';
 import Axios from 'axios';
-import { config, transactions } from 'blockstack';
+import { config, transactions, network } from 'blockstack';
 import { WrappedNode } from '../../data/wrapped-node';
 
 function makeState(): AccountStateType {
@@ -110,7 +109,6 @@ export const accountModule: Module<AccountStateType, StateType> = {
       const wrapped = new WrappedKeychain(masterKeychain);
 
       const btcAddressNode = wrapped.getBitcoinAddressNode(0);
-      // @ts-ignore
       const paymentKey = btcAddressNode.keyPair.privateKey.toString('hex');
 
       const amountSatoshis = Math.floor(amount * SATOSHIS_IN_BTC);
