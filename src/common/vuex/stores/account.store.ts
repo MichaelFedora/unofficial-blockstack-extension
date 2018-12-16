@@ -4,7 +4,7 @@ import { AccountStateType, SATOSHIS_IN_BTC } from './types/account.state';
 import { StateType } from './types/state';
 import { decrypt, encrypt } from '../../util';
 import { validateMnemonic, mnemonicToSeed } from 'bip39';
-import Axios from 'axios';
+import Axios, { AxiosPromise, AxiosResponse } from 'axios';
 import { config, transactions, network } from 'blockstack';
 import { WrappedNode } from '../../data/wrapped-node';
 
@@ -88,15 +88,18 @@ export const accountModule: Module<AccountStateType, StateType> = {
     },
     async refreshBalances({ state, commit, rootState }) {
       const balances: { [key: string]: number } = { };
-      const insightUrl = 'https://utxo.blockstack.org/insight-api/addr/{address}'; // only one that works
+      const insightUrl = 'https://blockstack-explorer-api.herokuapp.com/api/addresses/{address}?page=0'
 
       for(const addr of state.bitcoinAccount.addresses) {
-        const rootUrl = insightUrl.replace('{address}', addr);
-        const results = await Promise.all([
-          Axios.get(rootUrl + '/balance'),
-          Axios.get(rootUrl + '/unconfirmedBalance')
-        ]);
-        balances[addr] = 1.0 * (results[0].data + results[1].data) / SATOSHIS_IN_BTC;
+        const url = insightUrl.replace('{address}', addr);
+        let res: AxiosResponse;
+        try {
+          res = await Axios.get(url);
+        } catch(e) {
+          console.error(`Error getting balances for address ${addr}:`, e);
+          continue;
+        }
+        balances[addr] = 1.0 * (res.data.balance) / SATOSHIS_IN_BTC;
       }
       commit('updateBalances', { balances });
     },

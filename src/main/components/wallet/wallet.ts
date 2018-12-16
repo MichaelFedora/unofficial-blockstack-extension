@@ -15,7 +15,7 @@ export default (Vue as VVue).component('bs-main-wallet', {
       btcPrice: 1000,
       refreshing: false,
       selected: 'btc',
-      txs: [],
+      // txs: [],
 
       btcPriceUrl: 'https://www.bitstamp.net/api/v2/ticker/btcusd/?cors=1',
       networkFeeUrl: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
@@ -39,13 +39,11 @@ export default (Vue as VVue).component('bs-main-wallet', {
       if(this.refreshing) return;
       this.refreshing = true;
       try {
-        const [_, txs, btcPrice] = await Promise.all([
+        const [_, /*txs,*/ btcPrice] = await Promise.all([
           dispatch('account/refreshBalances'),
           // v-- also nice, gets balance, stuff like that
-          // https://explorer.blockstack.org/insight-api/addr/1J3PUxY5uDShUnHRrMyU6yKtoHEUPhKULs
-          // https://explorer.blockstack.org/insight-api/currency
-          Axios.get('https://explorer.blockstack.org/insight-api/txs?address=' + this.address + '&pageNum=0')
-              .then(res => res.data.txs),
+          /*Axios.get('https://blockstack-explorer-api.herokuapp.com/api/addresses/' + '1J3PUxY5uDShUnHRrMyU6yKtoHEUPhKULs' + '?page=0')
+              .then(res => res.data.fullTransactions),*/
           Axios.get(this.btcPriceUrl)
               .catch(() => fetch(this.btcPriceUrl).then(res => ({ data: res.json() })))
               .then(res => res.data.last)/*,
@@ -53,18 +51,18 @@ export default (Vue as VVue).component('bs-main-wallet', {
                       .then(res => res.data.bpi.USD.rate))*/
         ]);
         this.btcPrice = btcPrice || 1000;
-        this.txs.splice(0, this.txs.length, ...(txs || []));
+        // this.txs.splice(0, this.txs.length, ...(txs || []));
       } catch(e) { console.error('Error refreshing balances:', e); }
       this.refreshing = false;
     },
-    formatBlocktime(millis: number) {
+    /*formatBlocktime(millis: number) {
       return DateTime.fromMillis(millis * 1000, { zone: 'utc' }).toLocaleString(DateTime.DATETIME_MED);
     },
-    profit(tx: { vin: any[], vout: any[] }) {
+    profit(tx: { inputs: any[], outputs: any[] }) {
       if(!tx) return;
       let val = 0;
-      if(tx.vin && tx.vin.length) {
-        val = tx.vin.reduce((acc, v) => acc + v.addr === this.address ? v.value : 0, val);
+      if(tx.inputs && tx.inputs.length) {
+        val = tx.inputs.reduce((acc, v) => acc + v.addr === this.address ? v.value : 0, val);
       }
 
       if(tx.vout && tx.vout.length) {
@@ -76,7 +74,7 @@ export default (Vue as VVue).component('bs-main-wallet', {
       }
 
       return val;
-    },
+    },*/
 
     openSendDialog() {
       this.$modal.open({

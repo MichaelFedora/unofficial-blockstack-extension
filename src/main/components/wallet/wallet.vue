@@ -36,14 +36,14 @@
       </div>
     </div>
 
-    <h4 class='title is-5' style='width: 100%'>Transaction History</h4>
+    <!-- h4 class='title is-5' style='width: 100%'>Transaction History</h4>
 
     <div id='history'>
       <div class='notification tx' v-for='tx in txs' :key='tx.txid' :class='{ "is-success": profit(tx) > 0, "is-danger": profit(tx) < 0 }'>
         <div>
           <span>tx id:</span>
           <a :href='"https://explorer.blockstack.org/tx/" + tx.txid'>{{tx.txid}}</a>
-          <span>date: {{formatBlocktime(tx.blocktime)}}</span>
+          <span>date: {{formatBlocktime(tx.time)}}</span>
         </div>
 
         <div class='tx-inner'>
@@ -75,7 +75,7 @@
       <div v-if='txs.length === 0' class='notification'>
         <span>Nothing here...</span>
       </div>
-    </div>
+    </div -->
 
   </div>
 </div>
