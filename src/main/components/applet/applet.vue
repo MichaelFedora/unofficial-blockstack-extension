@@ -8,14 +8,14 @@
 <a :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imageUrl'></figure></a>
 </b-tooltip>
 <a v-else :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imageUrl'></figure></a>
-<span class='name'>{{app.name}}</span>
+<span class='name'><span>{{app.name}}</span></span>
 </a>
 </template>
 <script src='./applet.ts'></script>
 <style lang='scss'>
 #bs-main-applet {
   position: relative;
-  height: 128px;
+  height: 150px;
   width: 100px;
   color: inherit;
   cursor: inherit;
@@ -60,7 +60,7 @@
     opacity: 1;
   }
 
-  > span.tooltip {
+  > spanspan.tooltip {
     padding: 0;
   }
 
@@ -85,10 +85,16 @@
   }
 
   > span.name {
-    text-align: center;
     width: 100%;
     padding: 0 0.5rem;
-    font-weight: 600;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    > span {
+      text-align: center;
+      width: 100%;
+      font-weight: 600;
+    }
   }
 }
 </style>

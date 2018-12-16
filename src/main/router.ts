@@ -25,8 +25,8 @@ router.beforeEach((to, from, next) => {
   if(to.path !== from.path) {
     if(to.path.length > 1) {
       const paths = to.path.slice(1).split('/').map(a => a[0].toLocaleUpperCase() + a.slice(1)).join(' - ');
-      document.title = 'Blockstack Extension - ' + paths;
-    } else document.title = 'Blockstack Extension';
+      document.title = 'uBlockstack Extension - ' + paths;
+    } else document.title = 'uBlockstack Extension';
   }
   next();
 });
