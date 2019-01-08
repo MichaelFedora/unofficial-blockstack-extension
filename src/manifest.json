@@ -39,8 +39,6 @@
     "keyword": "bs"
   },
   "background": {
-    "scripts": [
-      "bs-ext-background.js"
-    ]
+    "page": "background.html"
   }
 }

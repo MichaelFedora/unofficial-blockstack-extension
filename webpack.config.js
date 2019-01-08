@@ -75,6 +75,9 @@ return {
   devtool: production ? '' : 'inline-source-map',
 
   optimization: {
+    splitChunks: {
+      chunks: 'all'
+    },
     minimizer: [ new TerserJsPlugin({ terserOptions: { mangle: { reserved: [
                 'Buffer',
                 'BigInteger',
@@ -109,6 +112,11 @@ return {
       chunks: ['bs-ext-popup'],
       template: 'src/popup/index.html',
       filename: 'popup.html'
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ['bs-ext-background'],
+      template: 'src/background/index.html',
+      filename: 'background.html'
     }),
     new CopyWebpackPlugin([
       { from: 'src/*', flatten: true },

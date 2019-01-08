@@ -5,8 +5,7 @@
 /tmp
 /stage
 /out-tsc
-/build
-/build-prod
+/build*
 notepad.md
 
 # dependencies
