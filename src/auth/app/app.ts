@@ -278,7 +278,7 @@ export default (Vue as VueConstructor<VVue>).extend({
           });
         } else return this.close(); // idk :(
       }).catch(e => {
-        console.error(this.error = 'Uncaugh exception in approve: ' + (e.message ? e.message : JSON.stringify(e)));
+        console.error(this.error = 'Uncaught exception in approve: ' + (e.message ? e.message : JSON.stringify(e)));
         console.error(e);
       });
     },
