@@ -1,6 +1,6 @@
 {
   "name": "web-ext",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Adds Blockstack support to a web broswer.",
   "main": "blockstack-background.js",
   "private": true,
