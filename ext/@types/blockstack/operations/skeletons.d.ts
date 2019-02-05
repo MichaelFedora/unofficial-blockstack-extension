@@ -1,10 +1,10 @@
 import BigInteger from 'bigi';
-export declare type AmountTypeV1 = number;
-export declare type AmountTypeV2 = {
+declare type AmountTypeV1 = number;
+declare type AmountTypeV2 = {
     units: string;
     amount: BigInteger;
 };
-export declare type AmountType = AmountTypeV1 | AmountTypeV2;
+declare type AmountType = AmountTypeV1 | AmountTypeV2;
 export declare class BlockstackNamespace {
     namespaceID: string;
     version: number;
@@ -26,7 +26,7 @@ export declare class BlockstackNamespace {
     toHexPayload(): string;
 }
 export declare function makePreorderSkeleton(fullyQualifiedName: string, consensusHash: string, preorderAddress: string, burnAddress: string, burn: AmountType, registerAddress?: string): any;
-export declare function makeRegisterSkeleton(fullyQualifiedName: string, ownerAddress: string, valueHash?: string): any;
+export declare function makeRegisterSkeleton(fullyQualifiedName: string, ownerAddress: string, valueHash?: string, burnTokenAmountHex?: string): any;
 export declare function makeRenewalSkeleton(fullyQualifiedName: string, nextOwnerAddress: string, lastOwnerAddress: string, burnAddress: string, burn: AmountType, valueHash?: string): any;
 export declare function makeTransferSkeleton(fullyQualifiedName: string, consensusHash: string, newOwner: string, keepZonefile?: boolean): any;
 export declare function makeUpdateSkeleton(fullyQualifiedName: string, consensusHash: string, valueHash: string): any;
@@ -36,3 +36,5 @@ export declare function makeNamespaceRevealSkeleton(namespace: BlockstackNamespa
 export declare function makeNamespaceReadySkeleton(namespaceID: string): any;
 export declare function makeNameImportSkeleton(name: string, recipientAddr: string, zonefileHash: string): any;
 export declare function makeAnnounceSkeleton(messageHash: string): any;
+export declare function makeTokenTransferSkeleton(recipientAddress: string, consensusHash: string, tokenType: string, tokenAmount: BigInteger, scratchArea: string): any;
+export {};

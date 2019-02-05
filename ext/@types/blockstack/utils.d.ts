@@ -22,6 +22,7 @@ export declare function updateQueryStringParameter(uri: string, key: string, val
 export declare function isLaterVersion(v1: string, v2: string): boolean;
 export declare function hexStringToECPair(skHex: string): any;
 export declare function ecPairToHexString(secretKey: ECPair): any;
+export declare function ecPairToAddress(keyPair: ECPair): any;
 /**
  * UUIDs
  * @private

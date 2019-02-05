@@ -1,3 +1,4 @@
+import 'cross-fetch/polyfill';
 /**
  * Create an authentication token to be sent to the Core API server
  * in order to generate a Core session JWT.

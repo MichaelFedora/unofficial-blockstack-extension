@@ -1,5 +1,5 @@
-/// <reference types="node" />
 import bitcoinjs from 'bitcoinjs-lib';
+import { TransactionSigner } from './signers';
 export declare const DUST_MINIMUM = 5500;
 export declare function hash160(buff: Buffer): any;
 export declare function hash128(buff: Buffer): Buffer;
@@ -28,3 +28,7 @@ export declare function addUTXOsToFund(txBuilderIn: bitcoinjs.TransactionBuilder
     tx_hash: string;
     tx_output_n: number;
 }>, amountToFund: number, feeRate: number, fundNewFees?: boolean): any;
+export declare function signInputs(txB: bitcoinjs.TransactionBuilder, defaultSigner: TransactionSigner, otherSigners?: Array<{
+    index: number;
+    signer: TransactionSigner;
+}>): Promise<any>;

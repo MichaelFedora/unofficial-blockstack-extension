@@ -7,7 +7,7 @@ export declare type GaiaHubConfig = {
 };
 export declare function uploadToGaiaHub(filename: string, contents: any, hubConfig: GaiaHubConfig, contentType?: string): Promise<any>;
 export declare function getFullReadUrl(filename: string, hubConfig: GaiaHubConfig): string;
-export declare function connectToGaiaHub(gaiaHubUrl: string, challengeSignerHex: string): Promise<any>;
+export declare function connectToGaiaHub(gaiaHubUrl: string, challengeSignerHex: string, associationToken?: string): Promise<GaiaHubConfig>;
 /**
  * These two functions are app-specific connections to gaia hub,
  *   they read the user data object for information on setting up
@@ -15,6 +15,6 @@ export declare function connectToGaiaHub(gaiaHubUrl: string, challengeSignerHex:
  * @private
  * @returns {Promise} that resolves to the new gaia hub connection
  */
-export declare function setLocalGaiaHubConnection(): Promise<any>;
-export declare function getOrSetLocalGaiaHubConnection(): Promise<any>;
-export declare function getBucketUrl(gaiaHubUrl: any, appPrivateKey: any): Promise<any>;
+export declare function setLocalGaiaHubConnection(): Promise<GaiaHubConfig>;
+export declare function getOrSetLocalGaiaHubConnection(): Promise<GaiaHubConfig>;
+export declare function getBucketUrl(gaiaHubUrl: string, appPrivateKey: string): Promise<string>;

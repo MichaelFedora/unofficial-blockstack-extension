@@ -1,16 +1,17 @@
 /**
- * Generates a ECDSA keypair and stores the hex value of the private key in
- * local storage.
- * @return {String} the hex encoded private key
- * @private
- */
-export declare function generateAndStoreTransitKey(): any;
-/**
  * Fetches the hex value of the transit private key from local storage.
  * @return {String} the hex encoded private key
  * @private
  */
 export declare function getTransitKey(): string;
+/**
+ * Generates a ECDSA keypair to
+ * use as the ephemeral app transit private key
+ * and stores the hex value of the private key in
+ * local storage.
+ * @return {String} the hex encoded private key
+ */
+export declare function generateAndStoreTransitKey(): any;
 /**
  * Check if a user is currently signed in.
  * @return {Boolean} `true` if the user is signed in, `false` if not.
@@ -39,8 +40,7 @@ export declare function redirectToSignInWithAuthRequest(authRequest?: string, bl
  * Most applications should use this
  * method for sign in unless they require more fine grained control over how the
  * authentication request is generated. If your app falls into this category,
- * use `generateAndStoreTransitKey`, `makeAuthRequest`,
- * and `redirectToSignInWithAuthRequest` to build your own sign in process.
+ * use `makeAuthRequest` and `redirectToSignInWithAuthRequest` to build your own sign in process.
  *
  * @param {String} [redirectURI=`${window.location.origin}/`]
  * The location to which the identity provider will redirect the user after
@@ -57,7 +57,7 @@ export declare function redirectToSignIn(redirectURI?: string, manifestURI?: str
  * Retrieve the authentication token from the URL query
  * @return {String} the authentication token if it exists otherwise `null`
  */
-export declare function getAuthResponseToken(): any;
+export declare function getAuthResponseToken(): string;
 /**
  * Check if there is a authentication request that hasn't been handled.
  * @return {Boolean} `true` if there is a pending sign in, otherwise `false`
@@ -69,19 +69,22 @@ export declare function isSignInPending(): boolean;
  *
  * @param {String} nameLookupURL - the endpoint against which to verify public
  * keys match claimed username
- *
+ * @param {String} authResponseToken - the signed authentication response token
+ * @param {String} transitKey - the transit private key that corresponds to the transit public key
+ * that was provided in the authentication request
  * @return {Promise} that resolves to the user data object if successful and rejects
  * if handling the sign in request fails or there was no pending sign in request.
  */
-export declare function handlePendingSignIn(nameLookupURL?: string): Promise<{
+export declare function handlePendingSignIn(nameLookupURL?: string, authResponseToken?: string, transitKey?: string): Promise<{
     username: any;
     profile: any;
     decentralizedID: any;
     identityAddress: any;
     appPrivateKey: any;
     coreSessionToken: any;
-    authResponseToken: any;
+    authResponseToken: string;
     hubUrl: string;
+    gaiaAssociationToken: any;
 }>;
 /**
  * Retrieves the user data object. The user's profile is stored in the key `profile`.

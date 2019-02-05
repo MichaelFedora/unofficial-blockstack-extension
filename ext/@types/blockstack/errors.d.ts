@@ -4,9 +4,9 @@ export declare const ERROR_CODES: {
     UNKNOWN: string;
 };
 export interface ErrorType {
-    code: string;
-    parameter?: string;
-    message: string;
+  code: string;
+  parameter?: string;
+  message: string;
 }
 export declare class BlockstackError extends Error {
     message: string;
@@ -40,3 +40,7 @@ export declare class InvalidAmountError extends BlockstackError {
 export declare class LoginFailedError extends BlockstackError {
     constructor(reason: string);
 }
+export declare class SignatureVerificationError extends BlockstackError {
+    constructor(reason: string);
+}
+export {};

@@ -1,7 +1,7 @@
-/// <reference types="node" />
+import 'cross-fetch/polyfill';
 export interface AuthMetadata {
-    email?: string;
-    profileUrl?: string;
+  email?: string;
+  profileUrl?: string;
 }
 /**
  * Generates an authentication request that can be sent to the Blockstack
@@ -20,9 +20,12 @@ export interface AuthMetadata {
  * @param {Array<String>} scopes - the permissions this app is requesting
  * @param {String} appDomain - the origin of this app
  * @param {Number} expiresAt - the time at which this request is no longer valid
+ * @param {Object} extraParams - Any extra parameters you'd like to pass to the authenticator.
+ * Use this to pass options that aren't part of the Blockstack auth spec, but might be supported
+ * by special authenticators.
  * @return {String} the authentication request
  */
-export declare function makeAuthRequest(transitPrivateKey?: string, redirectURI?: string, manifestURI?: string, scopes?: Array<String>, appDomain?: string, expiresAt?: number): string;
+export declare function makeAuthRequest(transitPrivateKey?: string, redirectURI?: string, manifestURI?: string, scopes?: Array<String>, appDomain?: string, expiresAt?: number, extraParams?: Object): string;
 /**
  * Encrypts the private key for decryption by the given
  * public key.
@@ -39,8 +42,10 @@ export declare function encryptPrivateKey(publicKey: string, privateKey: string)
  * @param  {String} hexedEncrypted the ciphertext
  * @return {String}  the decrypted private key
  * @throws {Error} if unable to decrypt
+ *
+ * @private
  */
-export declare function decryptPrivateKey(privateKey: string, hexedEncrypted: string): string | Buffer;
+export declare function decryptPrivateKey(privateKey: string, hexedEncrypted: string): string | null;
 /**
  * Generates a signed authentication response token for an app. This
  * token is sent back to apps which use contents to access the
@@ -61,6 +66,10 @@ export declare function decryptPrivateKey(privateKey: string, hexedEncrypted: st
  * @param {String} transitPublicKey the public key provide by the app
  * in its authentication request with which secrets will be encrypted
  * @param {String} hubUrl URL to the write path of the user's Gaia hub
+ * @param {String} blockstackAPIUrl URL to the API endpoint to use
+ * @param {String} associationToken JWT that binds the app key to the identity key
  * @return {String} signed and encoded authentication response token
+ * @private
  */
-export declare function makeAuthResponse(privateKey: string, profile: any, username: string, metadata: AuthMetadata, coreToken?: string, appPrivateKey?: string, expiresAt?: number, transitPublicKey?: string, hubUrl?: string): string;
+export declare function makeAuthResponse(privateKey: string, profile: any, username: string | null, metadata: AuthMetadata, coreToken?: string, appPrivateKey?: string, expiresAt?: number, transitPublicKey?: string, hubUrl?: string, blockstackAPIUrl?: string, associationToken?: string): string;
+export {};

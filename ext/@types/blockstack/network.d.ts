@@ -1,28 +1,159 @@
-export interface UTXO {
+declare type UTXO = {
     value?: number;
     confirmations?: number;
     tx_hash: string;
     tx_output_n: number;
+};
+export declare class BitcoinNetwork {
+    broadcastTransaction(transaction: string): Promise<Object>;
+    getBlockHeight(): Promise<Number>;
+    getTransactionInfo(txid: string): Promise<{
+        block_height: Number;
+    }>;
+    getNetworkedUTXOs(address: string): Promise<Array<UTXO>>;
 }
 export declare class BlockstackNetwork {
     blockstackAPIUrl: string;
     broadcastServiceUrl: string;
-    layer1: any;
+    layer1: Object;
     DUST_MINIMUM: number;
-    includeUtxoMap: any;
+    includeUtxoMap: Object;
     excludeUtxoSet: Array<UTXO>;
     btc: BitcoinNetwork;
-    constructor(apiUrl: string, broadcastServiceUrl: string, bitcoinAPI: BitcoinNetwork, network?: any);
+    MAGIC_BYTES: string;
+    constructor(apiUrl: string, broadcastServiceUrl: string, bitcoinAPI: BitcoinNetwork, network?: Object);
     coerceAddress(address: string): any;
     getDefaultBurnAddress(): any;
+    /**
+     * Get the price of a name via the legacy /v1/prices API endpoint.
+     * @param {String} fullyQualifiedName the name to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }
+     * @private
+     */
+    getNamePriceV1(fullyQualifiedName: string): Promise<any>;
+    /**
+     * Get the price of a namespace via the legacy /v1/prices API endpoint.
+     * @param {String} namespaceID the namespace to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }
+     * @private
+     */
+    getNamespacePriceV1(namespaceID: string): Promise<any>;
+    /**
+     * Get the price of a name via the /v2/prices API endpoint.
+     * @param {String} fullyQualifiedName the name to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }
+     * @private
+     */
+    getNamePriceV2(fullyQualifiedName: string): Promise<any>;
+    /**
+     * Get the price of a namespace via the /v2/prices API endpoint.
+     * @param {String} namespaceID the namespace to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }
+     * @private
+     */
+    getNamespacePriceV2(namespaceID: string): Promise<any>;
+    /**
+     * Get the price of a name.
+     * @param {String} fullyQualifiedName the name to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }, where
+     *   .units encodes the cryptocurrency units to pay (e.g. BTC, STACKS), and
+     *   .amount encodes the number of units, in the smallest denominiated amount
+     *   (e.g. if .units is BTC, .amount will be satoshis; if .units is STACKS,
+     *   .amount will be microStacks)
+     */
     getNamePrice(fullyQualifiedName: string): Promise<any>;
+    /**
+     * Get the price of a namespace
+     * @param {String} namespaceID the namespace to query
+     * @return {Promise} a promise to an Object with { units: String, amount: BigInteger }, where
+     *   .units encodes the cryptocurrency units to pay (e.g. BTC, STACKS), and
+     *   .amount encodes the number of units, in the smallest denominiated amount
+     *   (e.g. if .units is BTC, .amount will be satoshis; if .units is STACKS,
+     *   .amount will be microStacks)
+     */
     getNamespacePrice(namespaceID: string): Promise<any>;
+    /**
+     * How many blocks can pass between a name expiring and the name being able to be
+     * re-registered by a different owner?
+     * @return {Promise} a promise to the number of blocks
+     */
     getGracePeriod(): Promise<any>;
+    /**
+     * Get the names -- both on-chain and off-chain -- owned by an address.
+     * @param {String} address the blockchain address (the hash of the owner public key)
+     * @return {Promise} a promise that resolves to a list of names (Strings)
+     */
     getNamesOwned(address: string): Promise<any>;
+    /**
+     * Get the blockchain address to which a name's registration fee must be sent
+     * (the address will depend on the namespace in which it is registered.)
+     * @param {String} namespace the namespace ID
+     * @return {Promise} a promise that resolves to an address (String)
+     */
     getNamespaceBurnAddress(namespace: string): Promise<any>;
+    /**
+     * Get WHOIS-like information for a name, including the address that owns it,
+     * the block at which it expires, and the zone file anchored to it (if available).
+     * @param {String} fullyQualifiedName the name to query.  Can be on-chain of off-chain.
+     * @return {Promise} a promise that resolves to the WHOIS-like information
+     */
     getNameInfo(fullyQualifiedName: string): Promise<any>;
+    /**
+     * Get the pricing parameters and creation history of a namespace.
+     * @param {String} namespaceID the namespace to query
+     * @return {Promise} a promise that resolves to the namespace information.
+     */
     getNamespaceInfo(namespaceID: string): Promise<any>;
+    /**
+     * Get a zone file, given its hash.  Throws an exception if the zone file
+     * obtained does not match the hash.
+     * @param {String} zonefileHash the ripemd160(sha256) hash of the zone file
+     * @return {Promise} a promise that resolves to the zone file's text
+     */
     getZonefile(zonefileHash: string): Promise<string>;
+    /**
+     * Get the status of an account for a particular token holding.  This includes its total number of
+     * expenditures and credits, lockup times, last txid, and so on.
+     * @param {String} address the account
+     * @param {String} tokenType the token type to query
+     * @return {Promise} a promise that resolves to an object representing the state of the account
+     *   for this token
+     */
+    getAccountStatus(address: string, tokenType: string): Promise<any>;
+    /**
+     * Get a page of an account's transaction history.
+     * @param {String} address the account's address
+     * @param {number} page the page number.  Page 0 is the most recent transactions
+     * @return {Promise} a promise that resolves to an Array of Objects, where each Object encodes
+     *   states of the account at various block heights (e.g. prior balances, txids, etc)
+     */
+    getAccountHistoryPage(address: string, page: number): Promise<any>;
+    /**
+     * Get the state(s) of an account at a particular block height.  This includes the state of the
+     * account beginning with this block's transactions, as well as all of the states the account
+     * passed through when this block was processed (if any).
+     * @param {String} address the account's address
+     * @param {Integer} blockHeight the block to query
+     * @return {Promise} a promise that resolves to an Array of Objects, where each Object encodes
+     *   states of the account at this block.
+     */
+    getAccountAt(address: string, blockHeight: number): Promise<any>;
+    /**
+     * Get the set of token types that this account owns
+     * @param {String} address the account's address
+     * @return {Promise} a promise that resolves to an Array of Strings, where each item encodes the
+     *   type of token this account holds (excluding the underlying blockchain's tokens)
+     */
+    getAccountTokens(address: string): Promise<any>;
+    /**
+     * Get the number of tokens owned by an account.  If the account does not exist or has no
+     * tokens of this type, then 0 will be returned.
+     * @param {String} address the account's address
+     * @param {String} tokenType the type of token to query.
+     * @return {Promise} a promise that resolves to a BigInteger that encodes the number of tokens
+     *   held by this account.
+     */
+    getAccountBalance(address: string, tokenType: string): Promise<any>;
     /**
      * Performs a POST request to the given URL
      * @param  {String} endpoint  the name of
@@ -36,7 +167,7 @@ export declare class BlockstackNetwork {
      *
      * @private
      */
-    broadcastServiceFetchHelper(endpoint: string, body: any): Promise<Object | Error>;
+    broadcastServiceFetchHelper(endpoint: string, body: Object): Promise<Object | Error>;
     /**
     * Broadcasts a signed bitcoin transaction to the network optionally waiting to broadcast the
     * transaction until a second transaction has a certain number of confirmations.
@@ -54,6 +185,7 @@ export declare class BlockstackNetwork {
     *   with the transaction broadcast service
     * * `MissingParameterError` if you call the function without a required
     *   parameter
+    * @private
     */
     broadcastTransaction(transaction: string, transactionToWatch?: string, confirmations?: number): Promise<Object>;
     /**
@@ -70,6 +202,7 @@ export declare class BlockstackNetwork {
      *   with the transaction broadcast service
      * * `MissingParameterError` if you call the function without a required
      *   parameter
+     * @private
      */
     broadcastZoneFile(zoneFile: string, transactionToWatch?: string): Promise<any>;
     /**
@@ -98,6 +231,7 @@ export declare class BlockstackNetwork {
      *   with the transaction broadcast service
      * * `MissingParameterError` if you call the function without a required
      *   parameter
+     * @private
      */
     broadcastNameRegistration(preorderTransaction: string, registerTransaction: string, zoneFile: string): Promise<Object | Error>;
     getFeeRate(): Promise<number>;
@@ -124,17 +258,10 @@ export declare class LocalRegtest extends BlockstackNetwork {
     constructor(apiUrl: string, broadcastServiceUrl: string, bitcoinAPI: BitcoinNetwork);
     getFeeRate(): Promise<number>;
 }
-export declare class BitcoinNetwork {
-    broadcastTransaction(transaction: string): Promise<Object>;
-    getBlockHeight(): Promise<Number>;
-    getTransactionInfo(txid: string): Promise<{
-        block_height: Number;
-    }>;
-    getNetworkedUTXOs(address: string): Promise<Array<UTXO>>;
-}
 export declare class BitcoindAPI extends BitcoinNetwork {
     bitcoindUrl: string;
-    bitcoindCredentials: any;
+    bitcoindCredentials: Object;
+    importedBefore: Object;
     constructor(bitcoindUrl: string, bitcoindCredentials: {
         username: string;
         password: string;
@@ -177,3 +304,4 @@ export declare const network: {
         MAINNET_DEFAULT: BlockstackNetwork;
     };
 };
+export {};

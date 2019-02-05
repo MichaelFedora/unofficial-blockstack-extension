@@ -48,6 +48,8 @@ export declare function isIssuanceDateValid(token: string): boolean;
  * @param  {String}  token encoded and signed authentication token
  * @return {Boolean} `true` if the `token` has not yet expired, `false`
  * if the `token` has expired
+ *
+ * @private
  */
 export declare function isExpirationDateValid(token: string): boolean;
 /**
@@ -61,6 +63,7 @@ export declare function isManifestUriValid(token: string): boolean;
  * Makes sure the `redirect_uri` is a same origin absolute URL.
  * @param  {String}  token encoded and signed authentication token
  * @return {Boolean} `true` if valid, otherwise `false`
+ * @private
  */
 export declare function isRedirectUriValid(token: string): boolean;
 /**

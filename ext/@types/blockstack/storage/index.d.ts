@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { GaiaHubConfig, connectToGaiaHub, uploadToGaiaHub, BLOCKSTACK_GAIA_HUB_LABEL } from './hub';
 /**
  * Fetch the public read URL of a user file for the specified app.
@@ -13,15 +12,15 @@ import { GaiaHubConfig, connectToGaiaHub, uploadToGaiaHub, BLOCKSTACK_GAIA_HUB_L
  */
 export declare function getUserAppFileUrl(path: string, username: string, appOrigin: string, zoneFileLookupURL?: string): any;
 /**
- * Encrypts the data provided with the transit public key.
+ * Encrypts the data provided with the app public key.
  * @param {String|Buffer} content - data to encrypt
  * @param {Object} [options=null] - options object
- * @param {String} options.privateKey - the hex string of the ECDSA private
- * key to use for decryption. If not provided, will use user's appPrivateKey.
+ * @param {String} options.publicKey - the hex string of the ECDSA public
+ * key to use for encryption. If not provided, will use user's appPrivateKey.
  * @return {String} Stringified ciphertext object
  */
 export declare function encryptContent(content: string | Buffer, options?: {
-    privateKey?: string;
+    publicKey?: string;
 }): string;
 /**
  * Decrypts data encrypted with `encryptContent` with the
@@ -41,6 +40,8 @@ export declare function decryptContent(content: string, options?: {
  * @param {Object} [options=null] - options object
  * @param {Boolean} [options.decrypt=true] - try to decrypt the data with the app private key
  * @param {String} options.username - the Blockstack ID to lookup for multi-player storage
+ * @param {Boolean} options.verify - Whether the content should be verified, only to be used
+ * when `putFile` was set to `sign = true`
  * @param {String} options.app - the app to lookup for multi-player storage -
  * defaults to current origin
  * @param {String} [options.zoneFileLookupURL=null] - The URL
@@ -51,6 +52,7 @@ export declare function decryptContent(content: string, options?: {
  */
 export declare function getFile(path: string, options?: {
     decrypt?: boolean;
+    verify?: boolean;
     username?: string;
     app?: string;
     zoneFileLookupURL?: string;
@@ -60,12 +62,18 @@ export declare function getFile(path: string, options?: {
  * @param {String} path - the path to store the data in
  * @param {String|Buffer} content - the data to store in the file
  * @param {Object} [options=null] - options object
- * @param {Boolean} [options.encrypt=true] - encrypt the data with the app private key
+ * @param {Boolean|String} [options.encrypt=true] - encrypt the data with the app private key
+ *                                                  or the provided public key
+ * @param {Boolean} [options.sign=false] - sign the data using ECDSA on SHA256 hashes with
+ *                                         the app private key
+ * @param {String} [options.contentType=''] - set a Content-Type header for unencrypted data
  * @return {Promise} that resolves if the operation succeed and rejects
  * if it failed
  */
 export declare function putFile(path: string, content: string | Buffer, options?: {
-    encrypt?: boolean;
+    encrypt?: boolean | string;
+    sign?: boolean;
+    contentType?: string;
 }): Promise<any>;
 /**
  * Get the app storage bucket URL
@@ -74,7 +82,7 @@ export declare function putFile(path: string, content: string | Buffer, options?
  * @returns {Promise} That resolves to the URL of the app index file
  * or rejects if it fails
  */
-export declare function getAppBucketUrl(gaiaHubUrl: string, appPrivateKey: string): Promise<any>;
+export declare function getAppBucketUrl(gaiaHubUrl: string, appPrivateKey: string): Promise<string>;
 /**
  * Deletes the specified file from the app's data store. Currently not implemented.
  * @param {String} path - the path to the file to delete
@@ -83,4 +91,11 @@ export declare function getAppBucketUrl(gaiaHubUrl: string, appPrivateKey: strin
  * @private
  */
 export declare function deleteFile(path: string): void;
+/**
+ * List the set of files in this application's Gaia storage bucket.
+ * @param {function} callback - a callback to invoke on each named file that
+ * returns `true` to continue the listing operation or `false` to end it
+ * @return {Promise} that resolves to the number of files listed
+ */
+export declare function listFiles(callback: (name: string) => boolean): Promise<number>;
 export { connectToGaiaHub, uploadToGaiaHub, BLOCKSTACK_GAIA_HUB_LABEL, GaiaHubConfig };

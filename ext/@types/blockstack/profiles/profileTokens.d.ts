@@ -37,4 +37,4 @@ export declare function verifyProfileToken(token: any, publicKeyOrAddress: any):
   * @returns {Object} - the profile extracted from the encoded token
   * @throws {Error} - if the token isn't signed by the provided `publicKeyOrAddress`
   */
-export declare function extractProfile(token: any, publicKeyOrAddress?: any): any;
+export declare function extractProfile(token: any, publicKeyOrAddress?: any): {};
