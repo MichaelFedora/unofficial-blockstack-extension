@@ -45,4 +45,6 @@ export interface AuthTokenPayload {
   do_not_include_profile: boolean;
   supports_hub_url: boolean;
   scopes: string[];
+  hubUrl?: string;
+  associationToken?: string;
 }
