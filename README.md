@@ -7,12 +7,12 @@ having to run their own instance of the Blockstack Browser. This makes
 the experience much more native and easy to use!
 
 This browser does not quite have feature parity with the official browser,
-as it is missing the ability to acquire usernames and does not include
-the email scope for apps (yet).
+as it is missing the ability to acquire usernames and does not have the
+ability to do social verifications.
 
 ![screenshot-1](/gfx/screenshot-1.png)
 
-Forum discussion can be found [here](https://forum.blockstack.org/t/5414).
+Forum discussion can be found [here](https://forum.blockstack.org/t/7409/).
 
 ## Features
 
