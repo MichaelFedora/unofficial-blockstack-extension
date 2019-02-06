@@ -149,7 +149,8 @@ export default (Vue as VVue).component('bs-login', {
           console.log('Successfully logged in!')
           this.$emit('working', false);
           this.finish();
-        }).catch(e => {
+        }).catch(async e => {
+          await dispatch('logout');
           console.error(this.error = 'Error finalizing restore: ' + e);
           console.error(e);
           this.$emit('error', this.error);

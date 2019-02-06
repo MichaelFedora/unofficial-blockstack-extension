@@ -20,7 +20,7 @@ import { AppNode } from 'common/data/app-node';
 
 import { StateType } from 'common/vuex/stores/types/state';
 import { Store, mapGetters, mapState } from 'vuex';
-import { parseQuery } from 'common/util';
+import { parseQuery, makeAssociationToken } from 'common/util';
 import { dispatch, commit } from 'common/vuex/remote-interface';
 import { AppEntry } from 'common/data/app-entry';
 
@@ -242,6 +242,7 @@ export default (Vue as VueConstructor<VVue>).extend({
 
         let transitPublicKey: any = undefined;
         let hubUrl = undefined;
+        let gaiaAssociationToken = undefined;
 
         const requestVersion = this.decodedToken.payload.version || '0';
         if(isLaterVersion(requestVersion, '1.1.0') && this.decodedToken.payload.public_keys.length > 0)
@@ -249,9 +250,21 @@ export default (Vue as VueConstructor<VVue>).extend({
         if(appRequestSupportsDirectHub(this.decodedToken.payload)) // should always be true
           hubUrl = this.$store.state.settings.api.gaiaHubConfig.server;
 
+        if(isLaterVersion(requestVersion, '1.2.0') && this.decodedToken.payload.hubUrl != null)
+          hubUrl = this.decodedToken.payload.hubUrl;
+
+        if(isLaterVersion(requestVersion, '1.3.0')) {
+          if(this.decodedToken.payload.associationToken != null)
+            gaiaAssociationToken = this.decodedToken.payload.associationToken;
+          else
+            gaiaAssociationToken = makeAssociationToken(appPrivateKey, privateKey);
+        }
+
         const authResponse = makeAuthResponse(privateKey, profileResponseData, blockchainId,
                                               metadata, null, appPrivateKey,
-                                              undefined, transitPublicKey, hubUrl);
+                                              undefined, transitPublicKey, hubUrl,
+                                              this.$store.state.settings.api.coreApi,
+                                              gaiaAssociationToken);
 
         // (DNE): commit('removeCoreSessionToken', appDomain);
 

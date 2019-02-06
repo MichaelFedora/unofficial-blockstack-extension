@@ -25,6 +25,15 @@ Forum discussion can be found [here](https://forum.blockstack.org/t/5414).
 - API Setting Verification
 - Ability to set/change your account email
 
+## Known Issues
+
+Using an account that has a name with a profile.json from a particular Gaia
+Hub and switching to a different one in the settings will cause the extension
+to error in ways that may make the extension unusable.
+
+For now, make sure to use an account that has no names *or* stick with the
+default Gaia Hub / the Gaia Hub that has the profile.json stored for that name.
+
 ## Downloads (for Beta Version)
 
 ***Wallet Transactions have not been tested yet -- use at your own risk!***
@@ -47,6 +56,9 @@ web-ext run
 ```
 
 Where [web-ext](https://github.com/mozilla/web-ext) is the Mozilla web extension tester found on NPM.
+
+**Until Blockstack.js updaets how it detects the `blockstack:` protocol, Firefox no longer
+works. Use Chrome / Brave and "load unpacked" in the extensions menu to debug.**
 
 ## License
 

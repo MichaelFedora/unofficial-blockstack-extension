@@ -1,8 +1,9 @@
-import { payments } from 'bitcoinjs-lib';
+import { payments, ECPair } from 'bitcoinjs-lib';
 import bip32 from 'bip32';
-import { createCipher, createDecipher } from 'crypto';
+import { createCipher, createDecipher, randomBytes } from 'crypto';
 import { StateType } from './vuex/stores/types/state';
-import { connectToGaiaHub, uploadToGaiaHub, GaiaHubConfig } from 'blockstack';
+import { TokenSigner } from 'jsontokens';
+import { connectToGaiaHub, uploadToGaiaHub, GaiaHubConfig, hexStringToECPair, makeUUID4 } from 'blockstack';
 import { dispatch, commit } from './vuex/remote-interface';
 
 export function getAddress(node: bip32, network?: any) {
@@ -21,6 +22,27 @@ export async function decrypt(data: string, key: string): Promise<string> {
   let dec = decipher.update(data, 'hex', 'utf8');
   dec += decipher.final('utf8');
   return dec;
+}
+
+/** from: the CLI, with modifications */
+export function makeAssociationToken(appPrivateKey: string, identityKey: string): string {
+
+  const appPublicKey = ECPair.fromPrivateKey(Buffer.from(appPrivateKey, 'hex'), { compressed: true }).publicKey.toString('hex');
+  const identityPublicKey = ECPair.fromPrivateKey(Buffer.from(identityKey, 'hex'), { compressed: true }).publicKey.toString('hex');
+
+  const FOUR_MONTH_SECONDS = 60 * 60 * 24 * 31 * 4; // apparently a standard
+  const salt = randomBytes(16).toString('hex');
+
+  const associationTokenClaim = {
+    childToAssociate: appPublicKey,
+    iss: identityPublicKey,
+    exp: FOUR_MONTH_SECONDS + (new Date().getTime() / 1000),
+    salt
+  };
+
+  const associationToken = new TokenSigner('ES256K', identityKey).sign(associationTokenClaim);
+
+  return associationToken;
 }
 
 /** from: https://stackoverflow.com/a/3855394 */
