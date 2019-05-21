@@ -84,7 +84,7 @@ export const appsModule: Module<AppsStateType, StateType> = {
       commit('reset', options);
     },
     async updateAppList({ commit, rootState }) {
-      const res = await axios.get('https://app-co-api.herokuapp.com/api/apps');
+      const res = await axios.get('https://api.app.co/api/app-mining-apps');
       commit('updateAppList', { apps: res.data.apps.filter(a => a.authentication === 'Blockstack') })
     }
   }
