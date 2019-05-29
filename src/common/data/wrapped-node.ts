@@ -1,13 +1,14 @@
 import { getAddress } from '../util';
 import { ECPair } from 'bitcoinjs-lib';
-import bip32 from 'bip32';
+import * as bip32 from 'bip32';
+import { BIP32Interface } from 'bip32';
 
 export class WrappedNode {
 
-  private _node: bip32;
+  private _node: BIP32Interface;
   private _keyPair: ECPair;
 
-  constructor(node: bip32) {
+  constructor(node: BIP32Interface) {
     if(node instanceof WrappedNode)
       this._node = node.node;
     else
@@ -64,5 +65,5 @@ export class WrappedNode {
   public derivePath(path: string) { return new WrappedNode(this._node.derivePath(path)); }
 
   public sign(hash: any) { return this._node.sign(hash); }
-  public verify(hash: string, signature: string) { return this._node.verify(hash, signature); }
+  public verify(hash: Buffer, signature: Buffer) { return this._node.verify(hash, signature); }
 }

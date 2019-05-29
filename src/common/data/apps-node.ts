@@ -1,4 +1,4 @@
-import bip32 from 'bip32';
+import { BIP32Interface } from 'bip32';
 import { AppNode, hashCode } from './app-node';
 import { createHash } from 'crypto';
 import { WrappedNode } from './wrapped-node';
@@ -6,7 +6,7 @@ import { WrappedNode } from './wrapped-node';
 export class AppsNode extends WrappedNode {
   private _salt: string;
 
-  constructor(node: bip32, salt: string) {
+  constructor(node: BIP32Interface, salt: string) {
     super(node);
     this._salt = salt;
   }

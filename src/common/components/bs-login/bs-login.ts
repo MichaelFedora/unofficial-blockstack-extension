@@ -3,7 +3,8 @@ import { VVue } from '../../vvue';
 import { mapGetters, mapState } from 'vuex';
 import ccopy from 'clipboard-copy';
 import { validateMnemonic, mnemonicToSeed, generateMnemonic } from 'bip39';
-import bip32 from 'bip32';
+import * as bip32 from 'bip32';
+import { BIP32Interface } from 'bip32';
 import { randomBytes } from 'crypto';
 import { dispatch, commit } from '../../vuex/remote-interface';
 import { encrypt } from '../../util';
@@ -73,13 +74,13 @@ export default (Vue as VVue).component('bs-login', {
     },
     async initializeWallet() {
       console.log('Initializing Wallet!');
-      let masterKeychain: bip32 = null;
+      let masterKeychain: BIP32Interface = null;
       if(this.phrase && validateMnemonic(this.phrase)) {
-        const seedBuffer = mnemonicToSeed(this.phrase);
+        const seedBuffer = await mnemonicToSeed(this.phrase);
         masterKeychain = bip32.fromSeed(seedBuffer);
       } else if(!this.phrase) {
         this.phrase = generateMnemonic(128, randomBytes);
-        const seedBuffer = mnemonicToSeed(this.phrase);
+        const seedBuffer = await mnemonicToSeed(this.phrase);
         masterKeychain = bip32.fromSeed(seedBuffer);
       } else {
         throw new Error('Tried to initialize a wallet with a bad phrase');

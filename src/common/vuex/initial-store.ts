@@ -3,7 +3,8 @@ import { makeDefaultApiClone, ApiSettingsType } from '../settings/default';
 import { accountModule } from './stores/account.store';
 import { appsModule } from './stores/apps.store';
 import { registrationModule } from './stores/registration.store';
-import { connectToGaiaHub, GaiaHubConfig } from 'blockstack';
+import { connectToGaiaHub } from 'blockstack';
+import { GaiaHubConfig } from 'blockstack/storage';
 import { StateType } from './stores/types/state';
 import { identityModule } from './stores/identity.store';
 

@@ -1,4 +1,4 @@
-import bip32 from 'bip32';
+import { BIP32Interface } from 'bip32';
 import { createHash } from 'crypto';
 
 import { IdentityAddressOwnerNode } from './identity-address-owner-node';
@@ -20,7 +20,7 @@ export class WrappedKeychain {
   private _bitcoinPrivateKeychain: WrappedNode;
   private _bitcoinPublicKeychain: WrappedNode;
 
-  constructor(node: bip32 | WrappedNode) {
+  constructor(node: BIP32Interface | WrappedNode) {
     this.node = (node instanceof WrappedNode) ? node : new WrappedNode(node);
     this._identityPrivateKeychain = this.node.deriveHardened(IDENTITY_KEYCHAIN).deriveHardened(BLOCKSTACK_ON_BITCOIN);
     this._identityPublicKeychain = this._identityPrivateKeychain.neutered();

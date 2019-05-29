@@ -1,7 +1,7 @@
 
-import { transactions as bsTransactions, config, safety, GaiaHubConfig, makeProfileZoneFile, getTokenFileUrl } from 'blockstack';
+import { transactions as bsTransactions, safety } from 'blockstack';
 import { BlockstackNetwork } from 'blockstack/network';
-import { ActionContext, Module } from 'vuex';
+import { Module } from 'vuex';
 import axios from 'axios';
 import { RegistrationStateType } from './types/registration.state';
 import { StateType } from './types/state';

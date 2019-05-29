@@ -5,9 +5,9 @@
   <a @click='pin()'><b-icon :icon='pinned ? "pin-off" : "pin"'></b-icon></a>
 </div>
 <b-tooltip v-if='app.description' size='is-small' :label='app.description' multilined type='is-dark'>
-<a :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imageUrl'></figure></a>
+<a :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imgixImageUrl'></figure></a>
 </b-tooltip>
-<a v-else :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imageUrl'></figure></a>
+<a v-else :href='app.website' target='_blank' rel='noopener noreferrer'><figure><img :src='app.imgixImageUrl'></figure></a>
 <span class='name'><span>{{app.name}}</span></span>
 </a>
 </template>

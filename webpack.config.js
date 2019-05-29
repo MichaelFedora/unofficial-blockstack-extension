@@ -92,7 +92,7 @@ return {
   },
 
   plugins: [
-    new CleanWebpackPlugin([ production ? 'build-prod' : 'build' ]),
+    new CleanWebpackPlugin(),
     new VueLoaderPlugin(),
     // new ForkTsCheckWebpackPlugin(),
     new MiniCssExtractPlugin({

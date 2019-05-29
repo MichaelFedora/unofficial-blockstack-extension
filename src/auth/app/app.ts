@@ -10,7 +10,7 @@ import {
   updateQueryStringParameter
 } from 'blockstack';
 
-import bip32 from 'bip32';
+import * as bip32 from 'bip32';
 
 import { VALID_AUTH_SCOPES, validateAuthScopes, AuthTokenHeader, AuthTokenPayload } from 'common/token-util';
 import { decodeToken } from 'jsontokens'

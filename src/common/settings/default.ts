@@ -1,4 +1,4 @@
-import { GaiaHubConfig } from 'blockstack';
+import { GaiaHubConfig } from 'blockstack/storage';
 
 export const DEFAULT_CORE_API_ENDPOINT = 'https://core.blockstack.org'
 export const REGTEST_CORE_API_ENDPOINT = 'http://localhost:6270'

@@ -1,12 +1,13 @@
 import { payments, ECPair } from 'bitcoinjs-lib';
-import bip32 from 'bip32';
+import { BIP32Interface } from 'bip32';
 import { createCipher, createDecipher, randomBytes } from 'crypto';
 import { StateType } from './vuex/stores/types/state';
 import { TokenSigner } from 'jsontokens';
-import { connectToGaiaHub, uploadToGaiaHub, GaiaHubConfig, hexStringToECPair, makeUUID4 } from 'blockstack';
+import { connectToGaiaHub, uploadToGaiaHub } from 'blockstack';
+import { GaiaHubConfig } from 'blockstack/storage';
 import { dispatch, commit } from './vuex/remote-interface';
 
-export function getAddress(node: bip32, network?: any) {
+export function getAddress(node: BIP32Interface, network?: any) {
   return payments.p2pkh({ pubkey: node.publicKey }).address;
 }
 

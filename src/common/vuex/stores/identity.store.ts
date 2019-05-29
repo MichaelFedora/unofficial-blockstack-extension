@@ -4,8 +4,6 @@ import {
   signProfileToken,
   connectToGaiaHub,
   Person,
-  uploadToGaiaHub,
-  GaiaHubConfig,
   wrapProfileToken,
   resolveZoneFileToProfile
 } from 'blockstack';

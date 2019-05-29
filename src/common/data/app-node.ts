@@ -1,5 +1,4 @@
-import bip32 from 'bip32';
-// @ts-ignore
+import { BIP32Interface } from 'bip32';
 import { payments } from 'bitcoinjs-lib';
 import { createHash } from 'crypto';
 import { WrappedNode } from './wrapped-node';
@@ -19,12 +18,12 @@ export class AppNode extends WrappedNode {
 
   private _appDomain: string;
 
-  constructor(node: bip32, appDomain: string) {
+  constructor(node: BIP32Interface, appDomain: string) {
     super(node);
     this._appDomain = appDomain;
   }
 
-  static fromAppsNode(appsNode: bip32 | WrappedNode, salt: string, appDomain: string) {
+  static fromAppsNode(appsNode: BIP32Interface | WrappedNode, salt: string, appDomain: string) {
     const hash = createHash('sha256').update(`${appDomain}${salt}`).digest('hex');
     const appIndex = hashCode(hash);
     return new AppNode(appsNode.deriveHardened(appIndex), appDomain);

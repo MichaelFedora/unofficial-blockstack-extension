@@ -1,6 +1,4 @@
-import bip32 from 'bip32';
-// @ts-ignore
-import { payments } from 'bitcoinjs-lib';
+import { BIP32Interface } from 'bip32';
 import { AppsNode } from './apps-node';
 import { WrappedNode } from './wrapped-node';
 
@@ -22,7 +20,7 @@ export class IdentityAddressOwnerNode extends WrappedNode {
 
   private _appsNode: AppsNode;
 
-  constructor(node: bip32, salt: string) {
+  constructor(node: BIP32Interface, salt: string) {
     super(node);
     this._salt = salt;
     this._appsNode = new AppsNode(this.node.deriveHardened(APPS_NODE_INDEX), this.salt);
