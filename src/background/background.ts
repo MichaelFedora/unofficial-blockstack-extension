@@ -29,9 +29,9 @@ browser.webRequest.onBeforeRequest.addListener((details) => {
     if(/^(data|chrome-extension|moz-extension):/.test(details.url) || /\.(png|jpg)$/.test(details.url)) return;
     console.log('going places!', details.url);
 
-    if(/blockstack(?:\:|(?:\.org\/auth\?authRequest=))(.+)/.test(details.url)) {
+    if(/(?:(?:^blockstack\:)|(?:blockstack\.org\/auth\?authRequest=))(.+)/.test(details.url)) {
       // try-auth-here
-      const match = /blockstack(?:\:|(?:\.org\/auth\?authRequest=))(.+)/.exec(details.url);
+      const match = /(?:(?:^blockstack\:)|(?:blockstack\.org\/auth\?authRequest=))(.+)/.exec(details.url);
       if(!match || match.length < 2) return;
       const url = browser.extension.getURL('auth.html') + `?authRequest=${match[1]}&tabId=${(details.tabId || -1)}`;
       if(browser.windows) {
