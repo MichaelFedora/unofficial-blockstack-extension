@@ -9,6 +9,7 @@ import { decrypt } from 'common/util';
 import ChangePasswordComponent from 'common/components/bs-change-password/bs-change-password';
 import { FieldFlags } from 'vee-validate';
 import { DEFAULT_CORE_API_ENDPOINT, DEFAULT_GAIA_HUB } from 'common/settings/default';
+import { browser } from 'webextension-polyfill-ts';
 
 export default (Vue as VVue).component('bs-popup-settings', {
   props: {
@@ -20,6 +21,7 @@ export default (Vue as VVue).component('bs-popup-settings', {
       coreApi: '',
       gaiaHubUrl: '',
       working: false,
+      version: browser.runtime.getManifest().version
     }
   },
   computed: {

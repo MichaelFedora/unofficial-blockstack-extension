@@ -42,6 +42,10 @@
       <button class='button is-primary' :class='{ "is-loading": working }' :disabled='!applicable' @click='apply()'>Apply</button>
       <button class='button is-warning' :disabled='defaults' @click='resetDefaults()'>Reset Defaults</button>
     </div>
+
+    <div class='version'>
+      <span>{{version}}</span>
+    </div>
   </div>
 </div>
 </template>
@@ -81,6 +85,14 @@
         margin-right: 1rem;
       }
     }
+  }
+
+  div.version {
+    position: absolute;
+    left:0;
+    bottom: 2px;
+    width: 100%;
+    font-size: 0.8em;
   }
 }
 </style>
