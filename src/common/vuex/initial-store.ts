@@ -4,7 +4,7 @@ import { accountModule } from './stores/account.store';
 import { appsModule } from './stores/apps.store';
 import { registrationModule } from './stores/registration.store';
 import { connectToGaiaHub } from 'blockstack';
-import { GaiaHubConfig } from 'blockstack/storage';
+import { GaiaHubConfig } from 'blockstack/lib/storage/hub';
 import { StateType } from './stores/types/state';
 import { identityModule } from './stores/identity.store';
 

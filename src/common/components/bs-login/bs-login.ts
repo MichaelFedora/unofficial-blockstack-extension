@@ -30,12 +30,12 @@ export default (Vue as VVue).component('bs-login', {
   computed: {
     ...mapGetters({
       loggedIn: 'account/isLoggedIn'
-    }),
+    }) as { loggedIn: () => boolean },
     ...mapState({
       logoutReason: (state: StateType) => state.meta.logoutReason,
-    }),
+    }) as { logoutReason: () => string },
 
-    fullForm: function() {
+    fullForm(): boolean {
       return ((this.view === 'restore' ? this.phrase : true) && this.pass && this.confirm) ? true : false;
     },
   },

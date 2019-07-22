@@ -21,13 +21,13 @@ export default (Vue as VVue).extend({
     }
   },
   computed: {
-    defaultIdentity: function() {
+    defaultIdentity(): LocalIdentity {
       return this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
     },
-    profileName: function() {
+    profileName(): string {
       return this.getProfileName(this.defaultIdentity, true);
     },
-    profileImg: function() {
+    profileImg(): string {
       return (this.defaultIdentity &&
           this.defaultIdentity.profile &&
           this.defaultIdentity.profile.image &&
@@ -37,7 +37,7 @@ export default (Vue as VVue).extend({
     ...mapState({
       defaultIdIndex: (state: StateType) => state.identity.default,
       identities: (state: StateType) => state.identity.identities
-    })
+    }) as { defaultIdIndex: () => number, identities: () => LocalIdentity[] }
   },
   mounted() {
     this.updateSearch = _.debounce(this._updateSearch, 300);

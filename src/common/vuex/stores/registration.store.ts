@@ -1,6 +1,6 @@
 
 import { transactions as bsTransactions, safety } from 'blockstack';
-import { BlockstackNetwork } from 'blockstack/network';
+import { BlockstackNetwork } from 'blockstack/lib/network';
 import { Module } from 'vuex';
 import axios from 'axios';
 import { RegistrationStateType } from './types/registration.state';

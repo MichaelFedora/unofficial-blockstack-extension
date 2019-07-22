@@ -20,26 +20,26 @@ export default (Vue as VVue).component('bs-main-profile', {
     }
   },
   computed: {
-    defaultId: function() {
+    defaultId(): LocalIdentity {
       return this.$store.state.identity.identities.find(a => a.index === this.$store.state.identity.default);
     },
-    selectedId: function() {
+    selectedId(): LocalIdentity {
       return this.$store.state.identity.identities.find(a => a.index === this.current) || this.defaultId; // *shrug*
     },
-    defaultSelected: function() {
+    defaultSelected(): boolean {
       return this.selectedId.address === this.defaultId.address
     },
     ...mapState({
       defaultIdIndex: (state: StateType) => state.identity.default,
       identities: (state: StateType) => state.identity.identities
     })  as { defaultIdIndex: () => number, identities: () => LocalIdentity[] },
-    current: function() {
+    current(): number {
       const index = Number(this.index);
       const id = this.$store.state.identity.identities.find(a => a.index === index);
       if(id) return index;
       else return this.$store.state.identity.default;
     },
-    entries: function() {
+    entries(): { amt: number, nextLoc: number }[] {
       const ids = this.$store.state.identity.identities;
       const e = [];
       for(let i = 0; i < ids.length; i++) {

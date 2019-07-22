@@ -4,7 +4,7 @@ import { createCipher, createDecipher, randomBytes } from 'crypto';
 import { StateType } from './vuex/stores/types/state';
 import { TokenSigner } from 'jsontokens';
 import { connectToGaiaHub, uploadToGaiaHub } from 'blockstack';
-import { GaiaHubConfig } from 'blockstack/storage';
+import { GaiaHubConfig } from 'blockstack/lib/storage/hub';
 import { dispatch, commit } from './vuex/remote-interface';
 
 export function getAddress(node: BIP32Interface, network?: any) {

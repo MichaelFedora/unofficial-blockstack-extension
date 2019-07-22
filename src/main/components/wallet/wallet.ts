@@ -26,7 +26,7 @@ export default (Vue as VVue).component('bs-main-wallet', {
       address: (state: StateType) => state.account.bitcoinAccount.addresses[0],
       btc: (state: StateType) => state.account.bitcoinAccount.balances[state.account.bitcoinAccount.addresses[0]]
     }) as { address: () => string, btc: () => number },
-    usd: function() { return ((this.btc || 0) * this.btcPrice).toFixed(2); }
+    usd(): string { return ((this.btc || 0) * this.btcPrice).toFixed(2); }
   },
   mounted() {
     toCanvas(this.$refs.qrcode, this.address, { scale: 7, color: { dark: '#000000ff', light: '#ffffff00'}})

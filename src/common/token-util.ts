@@ -17,6 +17,8 @@ export function validateAuthScopes(scopes: Array<string>): boolean {
 
 export function verifyToken(token: string) {
   const decodedToken = decodeToken(token);
+  if(typeof decodedToken.payload === 'string')
+    throw new Error('Error verifying token: payload is *still* a string');
   const tokenVerifier = new TokenVerifier(decodedToken.header.alg, decodedToken.payload.issuer.publicKey)
   return (tokenVerifier && tokenVerifier.verify(token)) ? true : false;
 }

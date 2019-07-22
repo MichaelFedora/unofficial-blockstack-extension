@@ -23,23 +23,26 @@ export default (Vue as VVue).component('bs-popup-settings', {
     }
   },
   computed: {
-    applicable: function() {
+    applicable(): boolean {
       return this.email !== this.currentEmail ||
             this.coreApi !== this.currentCoreAPI ||
             this.gaiaHubUrl !== this.currentGaiaHubUrl;
     },
+
     ...mapGetters({
       loggedIn: 'account/isLoggedIn'
     }) as { loggedIn: () => boolean },
+
     ...mapState({
       currentEmail: (state: StateType) => state.account.email,
       currentGaiaHubUrl: (state: StateType) => state.settings.api.gaiaHubUrl,
       currentCoreAPI: (state: StateType) => state.settings.api.coreApi,
     }) as { currentEmail: () => string, currentCoreAPI: () => string, currentGaiaHubUrl: () => string },
-    fullForm: function() {
+
+    fullForm(): boolean {
       return this.coreApi && this.gaiaHubUrl ? true : false;
     },
-    defaults: function() {
+    defaults(): boolean {
       return this.coreApi === DEFAULT_CORE_API_ENDPOINT && this.gaiaHubUrl === DEFAULT_GAIA_HUB;
     }
   },

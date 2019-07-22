@@ -75,7 +75,7 @@ export default (Vue as VueConstructor<VVue>).extend({
     let decodedToken: { payload: AuthTokenPayload, header: AuthTokenHeader };
 
     try {
-      decodedToken = decodeToken(authRequest) as { payload: AuthTokenPayload, header: AuthTokenHeader };
+      decodedToken = decodeToken(authRequest) as any;
     } catch(e) {
       console.error(this.error = 'Error decoding token: ' + e);
       console.error(e);

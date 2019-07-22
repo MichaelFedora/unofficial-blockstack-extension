@@ -11,12 +11,12 @@ export default (Vue as VVue).component('bs-popup-profile', {
   },
   data() { return { } },
   computed: {
-    defaultId: function() { return this.identities.find(a => a.index === this.defaultIndex); },
-    profileName: function() { return this.getProfileName(this.defaultId); },
-    idString: function() { return this.defaultId ? `ID-${this.defaultId.address}` : ''; },
-    profileImg: function() { return this.getProfileImage(this.defaultId); },
-    bio: function() { return this.getBio(this.defaultId); },
-    otherIdentities: function() {
+    defaultId(): LocalIdentity { return this.identities.find(a => a.index === this.defaultIndex); },
+    profileName(): string { return this.getProfileName(this.defaultId); },
+    idString(): string { return this.defaultId ? `ID-${this.defaultId.address}` : ''; },
+    profileImg(): string { return this.getProfileImage(this.defaultId); },
+    bio(): string { return this.getBio(this.defaultId); },
+    otherIdentities(): LocalIdentity[] {
       return this.identities.filter((a, i) => i !== this.defaultIndex);
     },
     ...mapState({

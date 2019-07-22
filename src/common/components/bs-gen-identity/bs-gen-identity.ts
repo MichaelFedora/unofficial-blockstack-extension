@@ -18,11 +18,11 @@ export default (Vue as VVue).component('bs-gen-identity', {
     }
   },
   computed: {
-    validOffset: function() {
+    validOffset(): boolean {
       if(!this.offset) return true;
       else return this.offset > 0 && !this.$store.state.identity.identities.find(a => a.index === this.offset)
     },
-    excluded: function() {
+    excluded(): number[] {
       return this.$store.state.identity.identities.map(a => a.index);
     }
   },
