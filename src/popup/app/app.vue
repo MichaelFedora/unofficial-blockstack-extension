@@ -41,7 +41,7 @@
       <h5 class='title is-6' style='margin-bottom: 1rem' v-show='recentApps.length > 0'>Recent Apps</h5>
       <div class='results-apps'>
         <a v-for='app of recentApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
-          <img :src='app.imgixImageUrl'>
+          <img :src='app.imgixImageUrl || app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
       </div>
@@ -50,7 +50,7 @@
       <h5 class='title is-6' style='margin: 1rem 0'>Pinned Apps</h5>
       <div class='results-apps'>
         <a v-for='app of pinnedApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
-          <img :src='app.imgixImageUrl'>
+          <img :src='app.imgixImageUrl || app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
       </div>
@@ -59,7 +59,7 @@
       <h5 class='title is-6' style='margin: 1rem 0'>Recommended Apps</h5>
       <div class='results-apps'>
         <a v-for='app of recommendedApps' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
-          <img :src='app.imgixImageUrl'>
+          <img :src='app.imgixImageUrl || app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
       </div>
@@ -68,7 +68,7 @@
     <div v-else style='width: 100%'>
       <div class='results-apps'>
         <a v-for='app of appResults' :key='app.name' :href='app.website' target='_blank' rel='noreferrer noopener'>
-          <img :src='app.imgixImageUrl'>
+          <img :src='app.imgixImageUrl || app.imageUrl'>
           <span>{{app.name}}</span>
         </a>
       </div>
