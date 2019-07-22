@@ -213,7 +213,7 @@ export default (Vue as VueConstructor<VVue>).extend({
       if(!profileUrlPromise)
         profileUrlPromise = dispatch('identity/downloadProfiles', { index: this.currentIdentityIndex }).then(res => {
           if(res && res.profileUrl) return res.profileUrl;
-          else return dispatch('identity/getDefaultUrl', { index: this.currentIdentityIndex });
+          else return dispatch('identity/getDefaultProfileUrl', { index: this.currentIdentityIndex });
         });
 
       profileUrlPromise.then((profileUrl: string) => {
