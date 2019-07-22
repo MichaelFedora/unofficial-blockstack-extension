@@ -11,12 +11,6 @@ bgInitialStore.plugins.push(createPersistedState());
 const store = new Vuex.Store(bgInitialStore);
 initializeRemoteMaster(store);
 
-const ext_url = browser.extension.getURL('');
-const ext_url_prefix_length = 'moz-extension://'.length;
-
-const uuid = ext_url.substr(ext_url_prefix_length, ext_url.length - ext_url_prefix_length - 1);
-console.log('Got UUID: ', uuid);
-
 if(browser.runtime.lastError && browser.runtime.lastError.message)
   console.error('lastError:', browser.runtime.lastError.message);
 

@@ -4,7 +4,7 @@ import { createHash, randomBytes } from 'crypto';
 import { AppEntry } from '../../data/app-entry';
 import { AppsStateType } from './types/apps.state';
 import { StateType } from './types/state';
-import Vue from '../../../../node_modules/vue';
+import Vue from 'vue';
 
 function makeState(): AppsStateType {
   return {
