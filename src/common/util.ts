@@ -1,6 +1,6 @@
 import { payments, ECPair } from 'bitcoinjs-lib';
 import { BIP32Interface } from 'bip32';
-import { createCipher, createDecipher, randomBytes } from 'crypto';
+import { randomBytes, createDecipheriv, createCipheriv, createHash } from 'crypto';
 import { StateType } from './vuex/stores/types/state';
 import { TokenSigner } from 'jsontokens';
 import { connectToGaiaHub, uploadToGaiaHub } from 'blockstack';
@@ -11,15 +11,21 @@ export function getAddress(node: BIP32Interface, network?: any) {
   return payments.p2pkh({ pubkey: node.publicKey }).address;
 }
 
-export async function encrypt(data: string, key: string): Promise<string> {
-  const cipher = createCipher('aes192', key);
+export async function createIv() {
+  return createHash('sha256').update(randomBytes(16)).digest('hex').slice(0, 16);
+}
+
+export async function encrypt(data: string, key: string, iv: string): Promise<string> {
+  const k = createHash('sha256').update(key).digest();
+  const cipher = createCipheriv('aes256', k, iv);
   let enc = cipher.update(data, 'utf8', 'hex');
   enc += cipher.final('hex');
   return enc;
 }
 
-export async function decrypt(data: string, key: string): Promise<string> {
-  const decipher = createDecipher('aes192', key);
+export async function decrypt(data: string, key: string, iv: string): Promise<string> {
+  const k = createHash('sha256').update(key).digest();
+  const decipher = createDecipheriv('aes256', k, iv);
   let dec = decipher.update(data, 'hex', 'utf8');
   dec += decipher.final('utf8');
   return dec;

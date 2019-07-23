@@ -7,7 +7,7 @@ import * as bip32 from 'bip32';
 import { BIP32Interface } from 'bip32';
 import { randomBytes } from 'crypto';
 import { dispatch, commit } from '../../vuex/remote-interface';
-import { encrypt } from '../../util';
+import { encrypt, createIv } from '../../util';
 import { FieldFlags } from 'vee-validate';
 import { StateType } from '../../vuex/stores/types/state';
 
@@ -85,10 +85,11 @@ export default (Vue as VVue).component('bs-login', {
       } else {
         throw new Error('Tried to initialize a wallet with a bad phrase');
       }
-      return encrypt(this.phrase, this.pass).then(encryptedBackupPhrase => {
+      const iv = await createIv();
+      return encrypt(this.phrase, this.pass, iv).then(encryptedBackupPhrase => {
         console.log('Creating account w/ enc phrase: "' + encryptedBackupPhrase + '"!');
         return dispatch('account/createAccount',
-              { email: this.email, encryptedBackupPhrase, masterKeychain: masterKeychain.toBase58() });
+              { email: this.email, encryptedBackupPhrase, iv, masterKeychain: masterKeychain.toBase58() });
       });
     },
     async initializeIdentity(autoGenProfile?: boolean) {

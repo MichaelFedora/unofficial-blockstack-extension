@@ -183,7 +183,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
       commit('reset');
     },
     async create({ commit, state, rootState }, { password, index }: { password: string, index?: number }) {
-      const phrase = await decrypt(rootState.account.encryptedBackupPhrase, password);
+      const phrase = await decrypt(rootState.account.encryptedBackupPhrase, password, rootState.account.iv);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
       if(!index) {
         if(!state.identities.length) index = 0;

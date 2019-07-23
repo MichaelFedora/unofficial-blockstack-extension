@@ -2,7 +2,7 @@ import { Module } from 'vuex';
 import { WrappedKeychain } from '../../data/wrapped-keychain';
 import { AccountStateType, SATOSHIS_IN_BTC } from './types/account.state';
 import { StateType } from './types/state';
-import { decrypt, encrypt } from '../../util';
+import { decrypt, encrypt, createIv } from '../../util';
 import { validateMnemonic, mnemonicToSeed } from 'bip39';
 import Axios, { AxiosPromise, AxiosResponse } from 'axios';
 import { config, transactions, network } from 'blockstack';
@@ -13,6 +13,7 @@ function makeState(): AccountStateType {
     accountCreated: false,
     email: '',
     encryptedBackupPhrase: '',
+    iv: null,
     bitcoinAccount: {
       publicKeychain: '',
       addresses: [] as string[],
@@ -51,9 +52,10 @@ export const accountModule: Module<AccountStateType, StateType> = {
     async reset({ commit }) {
       commit('reset');
     },
-    async createAccount({ commit, state }, { email, encryptedBackupPhrase, masterKeychain, identitiesToGenerate }: {
+    async createAccount({ commit, state }, { email, encryptedBackupPhrase, iv, masterKeychain, identitiesToGenerate }: {
       email?: string,
       encryptedBackupPhrase: string,
+      iv: string,
       masterKeychain: string,
       identitiesToGenerate?: number
     }) {
@@ -72,6 +74,7 @@ export const accountModule: Module<AccountStateType, StateType> = {
         email: email || state.email,
         accountCreated: true,
         encryptedBackupPhrase,
+        iv,
         bitcoinAccount: {
           publicKeychain: wrapped.bitcoinPublicKeychain.toBase58(),
           addresses: [firstBitcoinAddress],
@@ -81,10 +84,11 @@ export const accountModule: Module<AccountStateType, StateType> = {
       } as Partial<AccountStateType>);
     },
     async changePassword({ state, commit }, { newpass, oldpass }: { newpass: string, oldpass: string }) {
-      const phrase = await decrypt(state.encryptedBackupPhrase, oldpass);
+      const phrase = await decrypt(state.encryptedBackupPhrase, oldpass, state.iv);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
-      const encryptedBackupPhrase = await encrypt(phrase, newpass);
-      commit('update', { encryptedBackupPhrase });
+      const iv = await createIv();
+      const encryptedBackupPhrase = await encrypt(phrase, newpass, iv);
+      commit('update', { iv, encryptedBackupPhrase });
     },
     async refreshBalances({ state, commit, rootState }) {
       const balances: { [key: string]: number } = { };
@@ -105,7 +109,7 @@ export const accountModule: Module<AccountStateType, StateType> = {
     },
     async withdraw({ state, dispatch }, { to, amount, password }: { to: string, amount: number, password: string }) {
       if(amount > state.bitcoinAccount.balances[0]) throw new Error('Will not overwithdraw from the account.')
-      const phrase = await decrypt(state.encryptedBackupPhrase, password);
+      const phrase = await decrypt(state.encryptedBackupPhrase, password, state.iv);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
       const seedBuffer = mnemonicToSeed(phrase);
       const masterKeychain = WrappedNode.fromSeed(seedBuffer);

@@ -100,7 +100,7 @@ export default (Vue as VVue).extend({
           type: 'password'
         },
         onConfirm: (value) => {
-          decrypt(this.$store.state.account.encryptedBackupPhrase, value).then(phrase => {
+          decrypt(this.$store.state.account.encryptedBackupPhrase, value, this.$store.state.account.iv).then(phrase => {
             this.$dialog.alert({
               title: 'Backup Phrase',
               message: `<div class='content'>
