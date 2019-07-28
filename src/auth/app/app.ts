@@ -201,7 +201,7 @@ export default (Vue as VueConstructor<VVue>).extend({
       let profileUrlPromise
 
       if(identity.zoneFile && identity.zoneFile.length > 0) {
-        const profileUrlFomZonefile = this.$store.getters['identity/getTokenFileUrl'](this.currentIdentityIndex);
+        const profileUrlFomZonefile = this.$store.getters['identity/getTokenFileUrl'](this.selectedIdx);
         if(profileUrlFomZonefile != null)
           profileUrlPromise = Promise.resolve(profileUrlFomZonefile);
       }
@@ -211,9 +211,9 @@ export default (Vue as VueConstructor<VVue>).extend({
       // const gaiaUrlBase = this.$store.state.settings.api.gaiaHubConfig.url_prefix;
 
       if(!profileUrlPromise)
-        profileUrlPromise = dispatch('identity/downloadProfiles', { index: this.currentIdentityIndex }).then(res => {
+        profileUrlPromise = dispatch('identity/downloadProfiles', { index: this.selectedIdx }).then(res => {
           if(res && res.profileUrl) return res.profileUrl;
-          else return dispatch('identity/getDefaultProfileUrl', { index: this.currentIdentityIndex });
+          else return dispatch('identity/getDefaultProfileUrl', { index: this.selectedIdx });
         });
 
       profileUrlPromise.then((profileUrl: string) => {
@@ -227,8 +227,8 @@ export default (Vue as VueConstructor<VVue>).extend({
               apps[appDomain] = appBucketUrl;
               identity.profile.apps = apps;
               return commit('identity/updateApp',
-                    { index: this.currentIdentityIndex, domain: appDomain, payload: appBucketUrl })
-                    .then(() => dispatch('identity/upload', { index: this.currentIdentityIndex }));
+                    { index: this.selectedIdx, domain: appDomain, payload: appBucketUrl })
+                    .then(() => dispatch('identity/upload', { index: this.selectedIdx }));
             }).then(() => profileUrl)
           }
         } else return profileUrl;

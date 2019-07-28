@@ -21,7 +21,7 @@ function search(text: string) {
 
 browser.webRequest.onBeforeRequest.addListener((details) => {
     if(/^(data|chrome-extension|moz-extension):/.test(details.url) || /\.(png|jpg)$/.test(details.url)) return;
-    console.log('going places!', details.url);
+    // console.log('going places!', details.url);
 
     if(/(?:(?:^blockstack\:)|(?:blockstack\.org\/auth\?authRequest=))(.+)/.test(details.url)) {
       // try-auth-here
