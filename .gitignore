@@ -6,6 +6,7 @@
 /stage
 /out-tsc
 /build*
+/releases
 notepad.md
 
 # dependencies
