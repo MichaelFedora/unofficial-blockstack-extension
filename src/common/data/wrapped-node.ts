@@ -3,7 +3,7 @@ import { ECPair } from 'bitcoinjs-lib';
 import * as bip32 from 'bip32';
 import { BIP32Interface } from 'bip32';
 
-export class WrappedNode {
+export class WrappedNode implements BIP32Interface {
 
   private _node: BIP32Interface;
   private _keyPair: ECPair;
@@ -43,6 +43,7 @@ export class WrappedNode {
   public get keyPair() { return this._keyPair; }
   public getAddress() { return getAddress(this._node); }
 
+  public get lowR() { return this._node.lowR; }
   public get chainCode() { return this._node.chainCode; }
   public get depth() { return this._node.depth; }
   public get index() { return this._node.index; }
