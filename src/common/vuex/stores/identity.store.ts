@@ -195,7 +195,7 @@ export const identityModule: Module<IdentityStateType, StateType> = {
           throw new Error('Cannot create an identity with an index < 0!');
       }
 
-      const seedBuffer = mnemonicToSeed(phrase);
+      const seedBuffer = await mnemonicToSeed(phrase);
       const masterKeychain = WrappedNode.fromSeed(seedBuffer);
       const wrapped = new WrappedKeychain(masterKeychain);
       const identityOwnerAddressNode = wrapped.getIdentityOwnerAddressNode(index);

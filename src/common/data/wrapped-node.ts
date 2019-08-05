@@ -35,7 +35,7 @@ export class WrappedNode {
     return new WrappedNode(bip32.fromPublicKey(publicKey, chainCode, network));
   }
 
-  public static fromSeed(seed: any, network?: any) {
+  public static fromSeed(seed: Buffer, network?: any) {
     return new WrappedNode(bip32.fromSeed(seed, network));
   }
 

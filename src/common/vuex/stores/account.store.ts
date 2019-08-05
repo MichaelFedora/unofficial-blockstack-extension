@@ -4,8 +4,8 @@ import { AccountStateType, SATOSHIS_IN_BTC } from './types/account.state';
 import { StateType } from './types/state';
 import { decrypt, encrypt, createIv } from '../../util';
 import { validateMnemonic, mnemonicToSeed } from 'bip39';
-import Axios, { AxiosPromise, AxiosResponse } from 'axios';
-import { config, transactions, network } from 'blockstack';
+import Axios, { AxiosResponse } from 'axios';
+import { config, transactions } from 'blockstack';
 import { WrappedNode } from '../../data/wrapped-node';
 
 function makeState(): AccountStateType {
@@ -111,7 +111,7 @@ export const accountModule: Module<AccountStateType, StateType> = {
       if(amount > state.bitcoinAccount.balances[0]) throw new Error('Will not overwithdraw from the account.')
       const phrase = await decrypt(state.encryptedBackupPhrase, password, state.iv);
       if(!validateMnemonic(phrase)) throw new Error('Wrong password!');
-      const seedBuffer = mnemonicToSeed(phrase);
+      const seedBuffer = await mnemonicToSeed(phrase);
       const masterKeychain = WrappedNode.fromSeed(seedBuffer);
       const wrapped = new WrappedKeychain(masterKeychain);
 

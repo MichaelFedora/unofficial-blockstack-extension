@@ -12,6 +12,7 @@ export enum RemoteMessageType {
 };
 
 export async function initializeRemoteChild<S>(store: Store<S>) {
+  if(debug) console.log('Initializing remote child!');
   const initialState = await browser.runtime.sendMessage({ type: RemoteMessageType.FETCH_INITIAL_STATE }).then(res => JSON.parse(res));
   store.replaceState(initialState);
 
@@ -32,30 +33,40 @@ export function commit(type: string, payload?: any, options?: CommitOptions) {
 }
 
 export function dispatch(type: string, payload?: any, options?: DispatchOptions) {
-  if(debug) console.log('dispatch', type, payload);
+  if(debug) console.log('dispatch SEND:', type, payload);
   return browser.runtime.sendMessage({ type: RemoteMessageType.INVOKE_ACTION, data: { type, payload, options } })
-      .then(a => a != null ? JSON.parse(a) : a);
+      .then(a => {
+      if(debug) console.log('dispatch RETURN: ', a);
+      return a != null ? JSON.parse(a) : a;
+    }, e => {
+      if(debug) console.error('dispatch ERROR: ', e);
+      throw e;
+    });
 }
 
 export function initializeRemoteMaster<S = any>(store: Store<S>) {
-  browser.runtime.onMessage.addListener((msg: any) => {
+  if(debug) console.log('Initializing remote master!');
+  browser.runtime.onMessage.addListener(async (msg: any) => {
     if(debug) console.log('Master: onMessage', msg);
     if(!msg)
-      return Promise.resolve();
+      return;
     else if(msg.type === RemoteMessageType.FETCH_INITIAL_STATE) {
-      return Promise.resolve(JSON.stringify(store.state));
+      return JSON.stringify(store.state);
     } else if(msg.type === RemoteMessageType.INVOKE_ACTION)
       return store.dispatch(msg.data.type, msg.data.payload, msg.data.options)
-                  .then(a => a != null ? JSON.stringify(a) : a)
-                  .then(a => new Promise( resolve => setTimeout(() => resolve(a)) ));
+                  .then(a => a != null ? JSON.stringify(a) : a,
+                  e => {
+                    if(debug) console.error('Master Store Dispatch ERROR: ', e);
+                    throw e;
+                  });
     else if(msg.type === RemoteMessageType.INVOKE_MUTATION) {
       store.commit(msg.data.type, msg.data.payload, msg.data.options);
-      return new Promise(resolve => setTimeout(() => resolve()));
     }
   });
 
   // Sync mutations on change with other parts of extension
   store.subscribe((mutation) => {
+    if(debug) console.log('Master MUTATION: ', mutation);
     browser.runtime.sendMessage({
       type: RemoteMessageType.SYNC_MUTATION,
       data: JSON.stringify(mutation)
