@@ -60,7 +60,7 @@
     "vue-template-compiler": "^2.6.10",
     "webextension-polyfill": "^0.4.0",
     "webpack": "^4.38.0",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "test": "web-ext run",
