@@ -15,7 +15,7 @@
     "bulma": "^0.7.5",
     "clipboard-copy": "^3.0.0",
     "jsontokens": "^2.0.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.15",
     "luxon": "^1.17.2",
     "qrcode-lite": "^1.2.2",
